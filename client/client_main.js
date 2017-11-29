@@ -58,9 +58,8 @@ function onRemovePlayer(data){
 
 
 //create my own player
-function createPlayer(){	
-	playerDude = game.add.sprite(32, 400, 'dude');
-	game.physics.p2.enable(playerDude);
+function createMyPlayer(){	
+	playerDude = new cd_player(32,400);
 	gameProperties.in_game = true;
 	socket.emit('new_player', {x: 32, y: 400});
 	//camera follow
@@ -69,15 +68,16 @@ function createPlayer(){
 }
 
 
-//enemy class
-var remote_player = function (id, startx, starty) {
+//all the player class
+var cd_player = function (startx, starty, id) {
 	this.x = startx;
 	this.y = starty;
 	//this is the unique socket id. We use it as a unique name for enemy
-	this.id = id;
-	
+	if(! id){
+		this.id = id;
+	}
+		
 	this.player = game.add.sprite(this.x, this.y, 'dude');
-
 	// draw a shape
 	game.physics.p2.enableBody(this.player);
 }
@@ -85,7 +85,7 @@ var remote_player = function (id, startx, starty) {
 
 //Server told us enemy, create it in the client
 function onNewPlayer(data){
-	var new_enemy = new remote_player(data.id, data.x, data.y);
+	var new_enemy = new cd_player(data.x, data.y,data.id);
 	enemies.push(new_enemy);
 }
 
@@ -98,8 +98,7 @@ function onEnemyMove (data) {
 	
 	if (!movePlayer) {
 		return;
-	}
-	
+	}	
 	movePlayer.player.body.x = data.x; 
 	movePlayer.player.body.y = data.y; 
 }
@@ -151,7 +150,7 @@ gameState = {
 		// socket.on("new_enemyPlayer", onNewPlayer);
 		game.stage.backgroundColor = 0xE1A193;;
 		console.log("client started");
-		socket.on("your_player", createPlayer());
+		socket.on("your_player", createMyPlayer());
 		//socket.on("connect", onsocketConnected); 
 		
 		//listen to new enemy connections
@@ -172,32 +171,32 @@ gameState = {
 			//keyboardInput = game.input.keyboard.createCursorKeys();
 			if (keyW.isDown){
 		        //  Move to the left
-		        playerDude.body.velocity.y = -150;
+		        playerDude.player.body.velocity.y = -150;
 		       // player.animations.play('left');
 	    	}
 	    	else if (keyA.isDown){
 		        //  Move to the right
-		        playerDude.body.velocity.x = -150;
+		        playerDude.player.body.velocity.x = -150;
 		        //player.animations.play('right');
 	    	}
 	    	else if (keyS.isDown){
 		        //  Move to the right
-		        playerDude.body.velocity.y = 150;
+		        playerDude.player.body.velocity.y = 150;
 		        //player.animations.play('right');
 	    	}
 	    	else if (keyD.isDown){
 		        //  Move to the right
-		        playerDude.body.velocity.x = 150;
+		        playerDude.player.body.velocity.x = 150;
 
 		        //player.animations.play('right');
 	    	}
 	    	else{
-	    		playerDude.body.velocity.x = 0;
-	    		playerDude.body.velocity.y = 0;
+	    		playerDude.player.body.velocity.x = 0;
+	    		playerDude.player.body.velocity.y = 0;
 	    	}
 	    	socket.emit('position_changed',{
-	    		x:playerDude.body.x,
-	    		y:playerDude.body.y,
+	    		x:playerDude.player.body.x,
+	    		y:playerDude.player.body.y,
 	    	})
     	}
 
