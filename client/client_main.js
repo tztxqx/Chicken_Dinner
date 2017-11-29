@@ -92,7 +92,7 @@ function onNewPlayer(data){
 //Server tells us there is a new enemy movement. We find the moved enemy
 //and sync the enemy movement with the server
 function onEnemyMove (data) {
-	console.log("moving enemy");
+	//console.log("moving enemy");
 
 	var movePlayer = findplayerbyid (data.id);
 
@@ -107,7 +107,7 @@ function onEnemyMove (data) {
 //Server tells us there is a new enemy rotation. We find the moved enemy
 //and sync the enemy movement with the server
 function onEnemyRotate (data) {
-	console.log("enemy angle " + data.rotation);
+	//console.log("enemy angle " + data.rotation);
 
 	var movePlayer = findplayerbyid (data.id);
 
@@ -222,7 +222,7 @@ gameState = {
 			})
 
 			var pointer = game.input.mousePointer;
-			playerDude.player.body.rotation = angleToPointer(playerDude, pointer);
+			playerDude.player.body.rotation = angleToPointer(playerDude.player, pointer, true);
 			socket.emit('rotation_changed', {
 				rotation : playerDude.player.body.rotation,
 			});
