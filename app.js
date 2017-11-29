@@ -20,7 +20,20 @@ var player_lst = [];
 var Player = function (startX, startY) {
   this.x = startX
   this.y = startY
+  this.sendData = true;
 }
+
+Player.prototype = {
+	canSendData: function() {
+		if (this.sendData) {
+			this.sendData = false;
+			setTimeout(function(){this.sendData = true}, 50);
+			return true;
+		} else {
+			return false;
+		}
+	}
+};
 
 //for finding the id of the enemy
 function find_playerid(id) {
@@ -86,33 +99,23 @@ function onClientdisconnect() {
 
 }
 
-function onPositionChanged(data){
+function onPlayerStateChanged(data){
 	var movePlayer = find_playerid(this.id);
 	if(!movePlayer){
 		console.log("cannot find moved player");
 		return;
 	}
+	if (!movePlayer.canSendData()) {
+		return;
+	}
 	var current_id = this.id;
 	var current_data ={
-		id:current_id,
+		id: current_id,
 		x : data.x,
 		y : data.y,
-	}
-	this.broadcast.emit('enemy_move', current_data)
-}
-
-function onRotationChanged(data){
-	var movePlayer = find_playerid(this.id);
-	if(!movePlayer){
-		console.log("cannot find moved player");
-		return;
-	}
-	var current_id = this.id;
-	var current_data ={
-		id:current_id,
-		rotation : data.rotation,
-	}
-	this.broadcast.emit('enemy_rotate', current_data)
+		rotation: data.rotation,
+	};
+	this.broadcast.emit('enemy_state_change', current_data);
 }
 
  // io connection
@@ -127,6 +130,5 @@ io.sockets.on('connection', function(socket){
 	});
 	// listen for new player
 	socket.on("new_player", onNewplayer);
-	socket.on("position_changed", onPositionChanged);
-	socket.on("rotation_changed", onRotationChanged);
+	socket.on("input_control", onPlayerStateChanged);
 });

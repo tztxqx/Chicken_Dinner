@@ -89,31 +89,18 @@ function onNewPlayer(data){
 	enemies.push(new_enemy);
 }
 
-//Server tells us there is a new enemy movement. We find the moved enemy
+//Server tells us there is a new enemy state change. We find the moved enemy
 //and sync the enemy movement with the server
-function onEnemyMove (data) {
-	//console.log("moving enemy");
+function onEnemyStateChange (data) {
+	//console.log("enemy change");
 
 	var movePlayer = findplayerbyid (data.id);
 
 	if (!movePlayer) {
 		return;
 	}
-
 	movePlayer.player.body.x = data.x;
-	movePlayer.player.body.y = data.y;
-}
-
-//Server tells us there is a new enemy rotation. We find the moved enemy
-//and sync the enemy movement with the server
-function onEnemyRotate (data) {
-	//console.log("enemy angle " + data.rotation);
-
-	var movePlayer = findplayerbyid (data.id);
-
-	if (!movePlayer) {
-		return;
-	}
+	movePlayer.player.body.y = data.y;	
 	movePlayer.player.body.rotation = data.rotation;
 }
 
@@ -173,10 +160,7 @@ gameState = {
 		//listen to new enemy connections
 		socket.on("new_enemyPlayer", onNewPlayer);
 		//listen to enemy movement
-		socket.on("enemy_move", onEnemyMove);
-
-		socket.on("enemy_rotate", onEnemyRotate);
-
+		socket.on("enemy_state_change", onEnemyStateChange);
 		// when received remove_player, remove the player passed;
 		socket.on('remove_player', onRemovePlayer);
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
@@ -206,7 +190,7 @@ gameState = {
 			//keyboardInput = game.input.keyboard.createCursorKeys();
 			var key = this.processKey();
 			var speed_one_direction = 150;
-			var speed_two_direction = 100;
+			var speed_two_direction = 120;
 			if (key.x != 0 && key.y != 0) {
 				key.x *= speed_two_direction;
 				key.y *= speed_two_direction;
@@ -216,14 +200,12 @@ gameState = {
 			}
 			playerDude.player.body.velocity.x = key.x;
 			playerDude.player.body.velocity.y = key.y;
-			socket.emit('position_changed',{
-				x:playerDude.player.body.x,
-				y:playerDude.player.body.y
-			})
-
+			
 			var pointer = game.input.mousePointer;
 			playerDude.player.body.rotation = angleToPointer(playerDude.player, pointer, true);
-			socket.emit('rotation_changed', {
+			socket.emit('input_control', {
+				x: playerDude.player.body.x,
+				y: playerDude.player.body.y,
 				rotation : playerDude.player.body.rotation,
 			});
 		}
@@ -232,20 +214,6 @@ gameState = {
 }
 
 //return the angle relate to the mouse
-function angleToPointer (displayObject, pointer, world) {
-
-        if (world === undefined) { world = false; }
-
-        if (world)
-        {
-            return Math.atan2(pointer.worldY - displayObject.world.y, pointer.worldX - displayObject.world.x);
-        }
-        else
-        {
-            return Math.atan2(pointer.worldY - displayObject.y, pointer.worldX - displayObject.x);
-        }
-
-}
 
 var gameBootstrapper = {
 	init: function(gameContainerElementId){
