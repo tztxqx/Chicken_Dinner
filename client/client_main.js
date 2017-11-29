@@ -58,9 +58,10 @@ function onRemovePlayer(data){
 
 
 //create my own player
-function createPlayer(){
-	playerDude = game.add.sprite(32, 400, 'dude');
-	game.physics.p2.enable(playerDude);
+function createMyPlayer(){
+	console.log(socket.id);
+	playerDude = new cd_player(32,400,socket.id);
+	console.log(playerDude);
 	gameProperties.in_game = true;
 	socket.emit('new_player', {x: 32, y: 400});
 	//camera follow
@@ -69,15 +70,14 @@ function createPlayer(){
 }
 
 
-//enemy class
-var remote_player = function (id, startx, starty) {
+//all the player class
+var cd_player = function (startx, starty, id) {
 	this.x = startx;
 	this.y = starty;
 	//this is the unique socket id. We use it as a unique name for enemy
 	this.id = id;
 
 	this.player = game.add.sprite(this.x, this.y, 'dude');
-
 	// draw a shape
 	game.physics.p2.enableBody(this.player);
 }
@@ -85,7 +85,7 @@ var remote_player = function (id, startx, starty) {
 
 //Server told us enemy, create it in the client
 function onNewPlayer(data){
-	var new_enemy = new remote_player(data.id, data.x, data.y);
+	var new_enemy = new cd_player(data.x, data.y,data.id);
 	enemies.push(new_enemy);
 }
 
@@ -130,14 +130,17 @@ function onInputRecieved (data) {
 }
 
 //main state
-var gameState = {
+var gameState = function(game) {
+	this.keyW;
+	this.keyS;
+	this.keyA;
+	this.keyD;
 };
 
 gameState = {
 	preload: function() {
 		console.log("preload");
 		game.stage.disableVisibilityChange = true;
-		game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 		game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight, false, false, false, false);
 		game.physics.startSystem(Phaser.Physics.P2JS);
 		game.physics.p2.setBoundsToWorld(false, false, false, false, false)
@@ -164,7 +167,7 @@ gameState = {
 		// socket.on("new_enemyPlayer", onNewPlayer);
 		game.stage.backgroundColor = 0xE1A193;;
 		console.log("client started");
-		socket.on("your_player", createPlayer());
+		socket.on("your_player", createMyPlayer());
 		//socket.on("connect", onsocketConnected);
 
 		//listen to new enemy connections
@@ -176,47 +179,47 @@ gameState = {
 
 		// when received remove_player, remove the player passed;
 		socket.on('remove_player', onRemovePlayer);
+		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
+		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
+		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
+		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
+	},
+
+	processKey: function() {
+		var key = {x: 0, y: 0};
+		if (this.keyW.isDown) {
+			key.y = -1;
+		} else if (this.keyS.isDown) {
+			key.y = 1;
+		}
+		if (this.keyA.isDown) {
+			key.x = -1;
+		} else if (this.keyD.isDown) {
+			key.x = 1;
+		}
+		return key;
 	},
 
 	update: function () {
 		if (gameProperties.in_game) {
-			var keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
-			var keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
-			var keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
-			var keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
+
 			//keyboardInput = game.input.keyboard.createCursorKeys();
-			if (keyW.isDown){
-		        //  Move to the left
-		        playerDude.body.velocity.y = -150;
-	    	}
-	    	else if (keyA.isDown){
-		        //  Move to the right
-		        playerDude.body.velocity.x = -150;
-	    	}
-	    	else if (keyS.isDown){
-		        //  Move to the right
-		        playerDude.body.velocity.y = 150;
-	    	}
-	    	else if (keyD.isDown){
-		        //  Move to the right
-		        playerDude.body.velocity.x = 150;
-	    	}
-	    	else{
-	    		playerDude.body.velocity.x = 0;
-	    		playerDude.body.velocity.y = 0;
-	    	}
-
-	    	socket.emit('position_changed',{
+			var key = this.processKey();
+			var speed_one_direction = 150;
+			var speed_two_direction = 100;
+			if (key.x != 0 && key.y != 0) {
+				key.x *= speed_two_direction;
+				key.y *= speed_two_direction;
+			} else {
+				key.x *= speed_one_direction;
+				key.y *= speed_one_direction;
+			}
+			playerDude.body.velocity.x = key.x;
+			playerDude.body.velocity.y = key.y;
+			socket.emit('position_changed',{
 	    		x:playerDude.body.x,
-	    		y:playerDude.body.y,
-	    	});
-
-				var pointer = game.input.mousePointer;
-				playerDude.body.rotation = angleToPointer(playerDude, pointer);
-
-				socket.emit('rotation_changed',{
-					rotation : playerDude.body.rotation
-	    	});
+	    		y:playerDude.body.y
+	    	})
     	}
 
 	}
