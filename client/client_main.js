@@ -220,6 +220,12 @@ gameState = {
 				x:playerDude.player.body.x,
 				y:playerDude.player.body.y
 			})
+
+			var pointer = game.input.mousePointer;
+			playerDude.player.body.rotation = angleToPointer(playerDude, pointer);
+			socket.emit('rotation_changed', {
+				rotation : playerDude.player.body.rotation,
+			});
 		}
 
 	}
@@ -244,7 +250,7 @@ function angleToPointer (displayObject, pointer, world) {
 var gameBootstrapper = {
 	init: function(gameContainerElementId){
 		game.state.add('gameState', gameState);
-		game.state.start('gameState'); 
+		game.state.start('gameState');
 	}
 };
 
