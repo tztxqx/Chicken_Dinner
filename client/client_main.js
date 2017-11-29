@@ -59,7 +59,9 @@ function onRemovePlayer(data){
 
 //create my own player
 function createMyPlayer(){	
-	playerDude = new cd_player(32,400);
+	console.log(socket.id);
+	playerDude = new cd_player(32,400,socket.id);
+	console.log(playerDude);
 	gameProperties.in_game = true;
 	socket.emit('new_player', {x: 32, y: 400});
 	//camera follow
@@ -73,10 +75,8 @@ var cd_player = function (startx, starty, id) {
 	this.x = startx;
 	this.y = starty;
 	//this is the unique socket id. We use it as a unique name for enemy
-	if(! id){
-		this.id = id;
-	}
-		
+	this.id = id;
+
 	this.player = game.add.sprite(this.x, this.y, 'dude');
 	// draw a shape
 	game.physics.p2.enableBody(this.player);
