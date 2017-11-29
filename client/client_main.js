@@ -136,7 +136,7 @@ gameState = {
 		game.load.image('ground', '/client/image/platform.png');
 		game.load.spritesheet('dude', '/client/image/dude.png', 32, 48);
 
-    },
+	},
 	
 	create: function () {
 		game.stage.backgroundColor = 0xE1A193;
@@ -201,10 +201,10 @@ gameState = {
 			playerDude.body.velocity.x = key.x;
 			playerDude.body.velocity.y = key.y;
 			socket.emit('position_changed',{
-	    		x:playerDude.body.x,
-	    		y:playerDude.body.y
-	    	})
-    	}
+				x:playerDude.body.x,
+				y:playerDude.body.y
+			})
+		}
 
 	}
 }
@@ -213,10 +213,10 @@ gameState = {
 
 
 var gameBootstrapper = {
-    init: function(gameContainerElementId){
+	init: function(gameContainerElementId){
 		game.state.add('gameState', gameState);
 		game.state.start('gameState'); 
-    }
+	}
 };
 
 gameBootstrapper.init("gameDiv");
