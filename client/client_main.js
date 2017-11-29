@@ -1,5 +1,5 @@
 //socket connection
-var socket; 
+var socket;
 socket = io.connect();
 
 
@@ -9,7 +9,7 @@ var canvas_height = window.innerHeight * window.devicePixelRatio;
 //the whole game
 var game = new Phaser.Game(canvas_width,canvas_height, Phaser.CANVAS, 'gameDiv');
 
-var gameProperties = { 
+var gameProperties = {
 	gameWidth: 4000,
 	gameHeight: 4000,
 	game_elemnt: "gameDiv",
@@ -28,14 +28,14 @@ var playerDude;
 function findplayerbyid (id) {
 	for (var i = 0; i < enemies.length; i++) {
 		if (enemies[i].id == id) {
-			return enemies[i]; 
+			return enemies[i];
 		}
 	}
 }
 
 //hard to trigger
 // function onsocketConnected () {
-// 	console.log("connected to server"); 
+// 	console.log("connected to server");
 // 	createPlayer();
 // 	gameProperties.in_game = true;
 // 	// send the server our initial position and tell it we are connected
@@ -51,14 +51,14 @@ function onRemovePlayer(data){
 		console.log('Player not found: ', data.id)
 		return;
 	}
-	
+
 	removePlayer.player.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 }
 
 
 //create my own player
-function createMyPlayer(){	
+function createMyPlayer(){
 	console.log(socket.id);
 	playerDude = new cd_player(32,400,socket.id);
 	console.log(playerDude);
@@ -93,14 +93,28 @@ function onNewPlayer(data){
 //and sync the enemy movement with the server
 function onEnemyMove (data) {
 	console.log("moving enemy");
-	
-	var movePlayer = findplayerbyid (data.id); 
-	
+
+	var movePlayer = findplayerbyid (data.id);
+
 	if (!movePlayer) {
 		return;
-	}	
-	movePlayer.player.body.x = data.x; 
-	movePlayer.player.body.y = data.y; 
+	}
+
+	movePlayer.player.body.x = data.x;
+	movePlayer.player.body.y = data.y;
+}
+
+//Server tells us there is a new enemy rotation. We find the moved enemy
+//and sync the enemy movement with the server
+function onEnemyRotate (data) {
+	console.log("enemy angle " + data.rotation);
+
+	var movePlayer = findplayerbyid (data.id);
+
+	if (!movePlayer) {
+		return;
+	}
+	movePlayer.player.body.rotation = data.rotation;
 }
 
 //we're receiving the calculated position from the server and changing the player position
@@ -108,9 +122,9 @@ function onInputRecieved (data) {
 	//we're forming a new pointer with the new position
 	var newPointer = {
 		x: data.x,
-		y: data.y, 
+		y: data.y,
 		worldX: data.x,
-		worldY: data.y, 
+		worldY: data.y,
 	}
 
 }
@@ -131,13 +145,13 @@ gameState = {
 		game.physics.startSystem(Phaser.Physics.P2JS);
 		game.physics.p2.setBoundsToWorld(false, false, false, false, false)
 		game.physics.p2.gravity.y = 0;
-		game.physics.p2.applyGravity = false; 
-		game.physics.p2.enableBody(game.physics.p2.walls, false); 
+		game.physics.p2.applyGravity = false;
+		game.physics.p2.enableBody(game.physics.p2.walls, false);
 		game.load.image('ground', '/client/image/platform.png');
 		game.load.spritesheet('dude', '/client/image/dude.png', 32, 48);
 
-	},
-	
+    },
+
 	create: function () {
 		game.stage.backgroundColor = 0xE1A193;
 		mapWalls = game.add.group();
@@ -148,20 +162,22 @@ gameState = {
 
 		//ask for my player
 		socket.emit("my_player");
-		// socket.on("connect", onsocketConnected); 
+		// socket.on("connect", onsocketConnected);
 
 		// socket.on("new_enemyPlayer", onNewPlayer);
 		game.stage.backgroundColor = 0xE1A193;;
 		console.log("client started");
 		socket.on("your_player", createMyPlayer());
-		//socket.on("connect", onsocketConnected); 
-		
+		//socket.on("connect", onsocketConnected);
+
 		//listen to new enemy connections
 		socket.on("new_enemyPlayer", onNewPlayer);
-		//listen to enemy movement 
+		//listen to enemy movement
 		socket.on("enemy_move", onEnemyMove);
-		
-		// when received remove_player, remove the player passed; 
+
+		socket.on("enemy_rotate", onEnemyRotate);
+
+		// when received remove_player, remove the player passed;
 		socket.on('remove_player', onRemovePlayer);
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
@@ -183,10 +199,10 @@ gameState = {
 		}
 		return key;
 	},
-	
+
 	update: function () {
 		if (gameProperties.in_game) {
-			
+
 			//keyboardInput = game.input.keyboard.createCursorKeys();
 			var key = this.processKey();
 			var speed_one_direction = 150;
@@ -209,8 +225,21 @@ gameState = {
 	}
 }
 
+//return the angle relate to the mouse
+function angleToPointer (displayObject, pointer, world) {
 
+        if (world === undefined) { world = false; }
 
+        if (world)
+        {
+            return Math.atan2(pointer.worldY - displayObject.world.y, pointer.worldX - displayObject.world.x);
+        }
+        else
+        {
+            return Math.atan2(pointer.worldY - displayObject.y, pointer.worldX - displayObject.x);
+        }
+
+}
 
 var gameBootstrapper = {
 	init: function(gameContainerElementId){
