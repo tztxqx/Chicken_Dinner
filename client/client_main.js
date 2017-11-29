@@ -198,11 +198,11 @@ gameState = {
 				key.x *= speed_one_direction;
 				key.y *= speed_one_direction;
 			}
-			playerDude.body.velocity.x = key.x;
-			playerDude.body.velocity.y = key.y;
+			playerDude.player.body.velocity.x = key.x;
+			playerDude.player.body.velocity.y = key.y;
 			socket.emit('position_changed',{
-				x:playerDude.body.x,
-				y:playerDude.body.y
+				x:playerDude.player.body.x,
+				y:playerDude.player.body.y
 			})
 		}
 
