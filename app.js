@@ -26,8 +26,9 @@ var Player = function (startX, startY) {
 Player.prototype = {
 	canSendData: function() {
 		if (this.sendData) {
+			var that = this;
 			this.sendData = false;
-			setTimeout(function(){this.sendData = true}, 50);
+			setTimeout(function(){that.sendData = true}, 50);
 			return true;
 		} else {
 			return false;
@@ -105,6 +106,7 @@ function onPlayerStateChanged(data){
 		console.log("cannot find moved player");
 		return;
 	}
+	//console.log(movePlayer.sendData);
 	if (!movePlayer.canSendData()) {
 		return;
 	}
@@ -115,6 +117,7 @@ function onPlayerStateChanged(data){
 		y : data.y,
 		rotation: data.rotation,
 	};
+	//console.log("where is enemy", current_data);
 	this.broadcast.emit('enemy_state_change', current_data);
 }
 
