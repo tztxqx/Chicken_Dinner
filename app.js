@@ -18,8 +18,8 @@ var player_lst = [];
 
 //a player class in the server
 var Player = function (startX, startY) {
-  this.x = startX
-  this.y = startY
+  this.x = startX;
+  this.y = startY;
   this.sendData = true;
 }
 

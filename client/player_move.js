@@ -2,14 +2,11 @@ function movetoPointer (player_dude, speed, pointer, maxTime) {
 
 	var displayObject = player_dude.player;
 	var angle = angleToPointer(displayObject, pointer);
-	console.log(displayObject.x, displayObject.y);
-	console.log(displayObject);
 
 	if (maxTime > 0)
 	{
 		speed = distanceToPointer(displayObject, pointer) / (maxTime / 1000);
 	}
-	console.log(distanceToPointer(displayObject, pointer));
 
 	displayObject.body.velocity.x = Math.cos(angle) * speed;
 	displayObject.body.velocity.y = Math.sin(angle) * speed;

@@ -4,6 +4,9 @@ socket = io.connect();
 
 var canvas_width = window.innerWidth * window.devicePixelRatio;
 var canvas_height = window.innerHeight * window.devicePixelRatio;
+var body_size = 15;
+var speed_one_direction = 300;
+var speed_two_direction = 240;
 
 var health_bar_relative_height = 20;
 
@@ -62,6 +65,7 @@ function onRemovePlayer(data){
 function createMyPlayer(data){
 	console.log(socket.id);
 	playerDude = new cd_player(data.x, data.y, data.id);
+	playerDude.player.body.collideWorldBounds = true;
 	game.camera.follow(playerDude.player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	console.log(playerDude);
 	gameProperties.in_game = true;
@@ -71,7 +75,9 @@ function createMyPlayer(data){
 	console.log("created");
 }
 
-
+function player_coll (body, bodyB, shapeA, shapeB, equation) {
+	console.log("collision", body);
+}
 //all the player class
 var cd_player = function (startx, starty, id) {
 	this.x = startx;
@@ -87,6 +93,8 @@ var cd_player = function (startx, starty, id) {
 	this.player = game.add.sprite(this.x, this.y, 'dude');
 	// draw a shape
 	game.physics.p2.enableBody(this.player);
+	this.player.body.setCircle(body_size);
+	this.player.body.onBeginContact.add(player_coll, this);
 }
 
 
@@ -108,7 +116,7 @@ function onEnemyStateChange (data) {
 
 	//movePlayer.player.body.x = data.x;
 	//movePlayer.player.body.y = data.y;
-	movetoPointer(movePlayer, 1500, {worldX: data.x, worldY: data.y}, 50);
+	movetoPointer(movePlayer, 300, {worldX: data.x, worldY: data.y}, 50);
 	movePlayer.player.body.rotation = data.rotation;
 }
 
@@ -135,13 +143,14 @@ var gameState = function(game) {
 gameState.prototype = {
 	preload: function() {
 		console.log("preload");
-		game.stage.disableVisibilityChange = false;
-		game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight, false, false, false, false);
+		game.stage.disableVisibilityChange = true;
+		game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+		game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight);
 		game.physics.startSystem(Phaser.Physics.P2JS);
-		game.physics.p2.setBoundsToWorld(false, false, false, false, false)
+		//game.physics.p2.setBoundsToWorld(true, true, true, true, true);
 		game.physics.p2.gravity.y = 0;
 		game.physics.p2.applyGravity = false;
-		game.physics.p2.enableBody(game.physics.p2.walls, false);
+		//game.physics.p2.enableBody(game.physics.p2.walls);
 		game.load.image('ground', '/client/image/platform.png');
 		game.load.spritesheet('dude', '/client/image/dude.png', 32, 48);
 
@@ -197,8 +206,6 @@ gameState.prototype = {
 
 			//keyboardInput = game.input.keyboard.createCursorKeys();
 			var key = this.processKey();
-			var speed_one_direction = 1500;
-			var speed_two_direction = 1200;
 			if (key.x != 0 && key.y != 0) {
 				key.x *= speed_two_direction;
 				key.y *= speed_two_direction;
