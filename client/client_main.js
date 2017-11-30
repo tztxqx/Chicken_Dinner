@@ -60,12 +60,8 @@ function onRemovePlayer(data){
 //create my own player
 function createMyPlayer(data){
 	console.log(socket.id);
-<<<<<<< HEAD
 	playerDude = new cd_player(data.x, data.y, data.id);
-=======
-	playerDude = new cd_player(32,400,socket.id);
 	game.camera.follow(playerDude.player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
->>>>>>> e498bc7cb745c6c5365c3acbdd9e2f592970e150
 	console.log(playerDude);
 	gameProperties.in_game = true;
 	//camera follow
