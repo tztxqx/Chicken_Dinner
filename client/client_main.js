@@ -5,6 +5,8 @@ socket = io.connect();
 var canvas_width = window.innerWidth * window.devicePixelRatio;
 var canvas_height = window.innerHeight * window.devicePixelRatio;
 
+var health_bar_relative_height = 20;
+
 //the whole game
 var game = new Phaser.Game(canvas_width,canvas_height, Phaser.CANVAS, 'gameDiv');
 
@@ -78,7 +80,7 @@ var cd_player = function (startx, starty, id) {
 	this.id = id;
 
 	//Setup for the health bar;
-	this.health_bar = new HealthBar(game, {x: 150, y: 115});
+	this.health_bar = new HealthBar(game, {width: 100, height: 10, x: this.x, y: this.y - health_bar_relative_height});
 
 	this.player = game.add.sprite(this.x, this.y, 'dude');
 	// draw a shape
@@ -104,7 +106,7 @@ function onEnemyStateChange (data) {
 
 	//movePlayer.player.body.x = data.x;
 	//movePlayer.player.body.y = data.y;
-	movetoPointer(movePlayer.player, 1500, {worldX: data.x, worldY: data.y}, 50);
+	movetoPointer(movePlayer, 1500, {worldX: data.x, worldY: data.y}, 50);
 	movePlayer.player.body.rotation = data.rotation;
 }
 
@@ -131,7 +133,7 @@ var gameState = function(game) {
 gameState.prototype = {
 	preload: function() {
 		console.log("preload");
-		game.stage.disableVisibilityChange = true;
+		game.stage.disableVisibilityChange = false;
 		game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight, false, false, false, false);
 		game.physics.startSystem(Phaser.Physics.P2JS);
 		game.physics.p2.setBoundsToWorld(false, false, false, false, false)
@@ -216,7 +218,7 @@ gameState.prototype = {
 				rotation : playerDude.player.body.rotation,
 			});
 
-			playerDude.health_bar.setPercent(20);
+			playerDude.health_bar.setPosition(playerDude.player.body.x,playerDude.player.body.y - health_bar_relative_height);
 		}
 
 	}
