@@ -79,8 +79,10 @@ var cd_player = function (startx, starty, id) {
 	//this is the unique socket id. We use it as a unique name for enemy
 	this.id = id;
 
+	this.life_value = 100;
 	//Setup for the health bar;
 	this.health_bar = new HealthBar(game, {width: 100, height: 10, x: this.x, y: this.y - health_bar_relative_height});
+	this.health_bar.setPercent(this.life_value);
 
 	this.player = game.add.sprite(this.x, this.y, 'dude');
 	// draw a shape
@@ -219,7 +221,8 @@ gameState.prototype = {
 			});
 
 			playerDude.health_bar.setPosition(playerDude.player.body.x,playerDude.player.body.y - health_bar_relative_height);
-			playerDude.health_bar.setPercent()
+			// Change life value can change the value in the health bar
+			playerDude.health_bar.setPercent(playerDude.life_value);
 		}
 
 	}

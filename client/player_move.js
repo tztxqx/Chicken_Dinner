@@ -15,6 +15,8 @@ function movetoPointer (player_dude, speed, pointer, maxTime) {
 	displayObject.body.velocity.y = Math.sin(angle) * speed;
 
 	player_dude.health_bar.setPosition(player_dude.player.body.x,player_dude.player.body.y - health_bar_relative_height);
+	player_dude.health_bar.setPercent(player_dude.life_value);
+
 
 	return angle;
 
