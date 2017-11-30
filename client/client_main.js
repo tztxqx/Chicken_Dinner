@@ -219,6 +219,7 @@ gameState.prototype = {
 			});
 
 			playerDude.health_bar.setPosition(playerDude.player.body.x,playerDude.player.body.y - health_bar_relative_height);
+			playerDude.health_bar.setPercent()
 		}
 
 	}
