@@ -2,7 +2,6 @@
 var socket;
 socket = io.connect();
 
-
 var canvas_width = window.innerWidth * window.devicePixelRatio;
 var canvas_height = window.innerHeight * window.devicePixelRatio;
 
@@ -64,6 +63,7 @@ function createMyPlayer(data){
 	game.camera.follow(playerDude.player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	console.log(playerDude);
 	gameProperties.in_game = true;
+
 	//camera follow
 	//game.camera.follow(playerDude, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	console.log("created");
@@ -76,6 +76,9 @@ var cd_player = function (startx, starty, id) {
 	this.y = starty;
 	//this is the unique socket id. We use it as a unique name for enemy
 	this.id = id;
+
+	//Setup for the health bar;
+	this.health_bar = new HealthBar(game, {x: 150, y: 115});
 
 	this.player = game.add.sprite(this.x, this.y, 'dude');
 	// draw a shape
@@ -166,6 +169,8 @@ gameState.prototype = {
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
+
+
 	},
 
 	processKey: function() {
@@ -201,7 +206,7 @@ gameState.prototype = {
 			playerDude.player.body.velocity.y = key.y;
 
 			//console.log(playerDude.player.x, playerDude.player.y, playerDude.player.world.x, playerDude.player.world.y);
-			
+
 			var pointer = game.input.mousePointer;
 			playerDude.player.body.rotation = angleToPointer(playerDude.player, pointer);
 			//console.log("emitting");
@@ -210,6 +215,8 @@ gameState.prototype = {
 				y: playerDude.player.body.y,
 				rotation : playerDude.player.body.rotation,
 			});
+
+			playerDude.health_bar.setPercent(20);
 		}
 
 	}
