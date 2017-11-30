@@ -46,11 +46,20 @@ function find_playerid(id) {
 	return false;
 }
 
+//for generate things randomly
+function randomInt (low, high) {
+    return Math.floor(Math.random() * (high - low) + low);
+}
+
+var randomRange = {
+	low : 200,
+	high : 600
+};
 
 function onNewplayer (data) {
-	console.log(data);
 	//new player instance
-	var newPlayer = new Player(data.x, data.y);
+	var newPlayer = new Player(randomInt(randomRange.low, randomRange.high), 
+		randomInt(randomRange.low, randomRange.high));
 	console.log(newPlayer);
 	console.log("created new player with id " + this.id);
 	newPlayer.id = this.id;
@@ -79,6 +88,7 @@ function onNewplayer (data) {
 	this.broadcast.emit('new_enemyPlayer', current_info);
 
 	player_lst.push(newPlayer);
+	this.emit("create_player", current_info);
 	console.log(player_lst);
 }
 
@@ -125,10 +135,7 @@ io.sockets.on('connection', function(socket){
 
 	// listen for disconnection;
 	socket.on('disconnect', onClientdisconnect);
-	socket.on('my_player',function(){
-		this.emit('your_player');
-	});
 	// listen for new player
-	socket.on("new_player", onNewplayer);
+	socket.on("my_player", onNewplayer);
 	socket.on("input_control", onPlayerStateChanged);
 });

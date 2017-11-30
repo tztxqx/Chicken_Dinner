@@ -58,12 +58,11 @@ function onRemovePlayer(data){
 
 
 //create my own player
-function createMyPlayer(){
+function createMyPlayer(data){
 	console.log(socket.id);
-	playerDude = new cd_player(32,400,socket.id);
+	playerDude = new cd_player(data.x, data.y, data.id);
 	console.log(playerDude);
 	gameProperties.in_game = true;
-	socket.emit('new_player', {x: 32, y: 400});
 	//camera follow
 	//game.camera.follow(playerDude, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	console.log("created");
@@ -124,7 +123,7 @@ var gameState = function(game) {
 	this.keyD;
 };
 
-gameState = {
+gameState.prototype = {
 	preload: function() {
 		console.log("preload");
 		game.stage.disableVisibilityChange = true;
@@ -151,12 +150,10 @@ gameState = {
 		socket.emit("my_player");
 		// socket.on("connect", onsocketConnected);
 
-		// socket.on("new_enemyPlayer", onNewPlayer);
 		game.stage.backgroundColor = 0xE1A193;;
 		console.log("client started");
-		socket.on("your_player", createMyPlayer());
+		socket.on("create_player", createMyPlayer);
 		//socket.on("connect", onsocketConnected);
-
 		//listen to new enemy connections
 		socket.on("new_enemyPlayer", onNewPlayer);
 		//listen to enemy movement
