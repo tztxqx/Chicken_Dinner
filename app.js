@@ -103,7 +103,7 @@ function randomInt (low, high) {
     return Math.floor(Math.random() * (high - low) + low);
 }
 
-function onNewplayer (data) {
+function onNewplayer (name) {
 	//new player instance
 	var newPlayer = new Player(randomInt(randomRange.low, randomRange.high, name), 
 		randomInt(randomRange.low, randomRange.high));
