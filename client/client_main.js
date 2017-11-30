@@ -60,7 +60,12 @@ function onRemovePlayer(data){
 //create my own player
 function createMyPlayer(data){
 	console.log(socket.id);
+<<<<<<< HEAD
 	playerDude = new cd_player(data.x, data.y, data.id);
+=======
+	playerDude = new cd_player(32,400,socket.id);
+	game.camera.follow(playerDude.player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
+>>>>>>> e498bc7cb745c6c5365c3acbdd9e2f592970e150
 	console.log(playerDude);
 	gameProperties.in_game = true;
 	//camera follow
@@ -91,15 +96,16 @@ function onNewPlayer(data){
 //Server tells us there is a new enemy state change. We find the moved enemy
 //and sync the enemy movement with the server
 function onEnemyStateChange (data) {
-	//console.log("enemy change");
-
 	var movePlayer = findplayerbyid (data.id);
 
 	if (!movePlayer) {
 		return;
 	}
-	movePlayer.player.body.x = data.x;
-	movePlayer.player.body.y = data.y;	
+	//console.log("enemy_state_change");
+
+	//movePlayer.player.body.x = data.x;
+	//movePlayer.player.body.y = data.y;
+	movetoPointer(movePlayer.player, 1500, {worldX: data.x, worldY: data.y}, 50);
 	movePlayer.player.body.rotation = data.rotation;
 }
 
@@ -186,8 +192,8 @@ gameState.prototype = {
 
 			//keyboardInput = game.input.keyboard.createCursorKeys();
 			var key = this.processKey();
-			var speed_one_direction = 150;
-			var speed_two_direction = 120;
+			var speed_one_direction = 1500;
+			var speed_two_direction = 1200;
 			if (key.x != 0 && key.y != 0) {
 				key.x *= speed_two_direction;
 				key.y *= speed_two_direction;
@@ -197,9 +203,12 @@ gameState.prototype = {
 			}
 			playerDude.player.body.velocity.x = key.x;
 			playerDude.player.body.velocity.y = key.y;
+
+			//console.log(playerDude.player.x, playerDude.player.y, playerDude.player.world.x, playerDude.player.world.y);
 			
 			var pointer = game.input.mousePointer;
-			playerDude.player.body.rotation = angleToPointer(playerDude.player, pointer, true);
+			playerDude.player.body.rotation = angleToPointer(playerDude.player, pointer);
+			//console.log("emitting");
 			socket.emit('input_control', {
 				x: playerDude.player.body.x,
 				y: playerDude.player.body.y,
