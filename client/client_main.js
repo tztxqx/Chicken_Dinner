@@ -17,6 +17,7 @@ var gameProperties = {
 
 //the enemy player list
 var enemies = [];
+var items = [];
 
 //variables
 var keyboardInput;
@@ -51,6 +52,7 @@ function onRemovePlayer(data){
 		return;
 	}
 
+	//removePlayer.health_bar.destroy();
 	removePlayer.player.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 }
@@ -76,7 +78,7 @@ var cd_player = function (startx, starty, id) {
 	this.y = starty;
 	//this is the unique socket id. We use it as a unique name for enemy
 	this.id = id;
-	this.type = "player_body";
+	this.type = "player";
 
 	this.life_value = 100;
 	//Setup for the health bar;
@@ -181,8 +183,11 @@ gameState.prototype = {
 		socket.on("enemy_state_change", onEnemyStateChange);
 		// when received remove_player, remove the player passed;
 		socket.on('remove_player', onRemovePlayer);
+		socket.on('remove_item', onItemRemove);
 		// get hurt
 		socket.on("player_hurt", onPlayerHurt);
+		// get element
+		socket.on("item_update", onItemUpdate);
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);

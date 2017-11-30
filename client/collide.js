@@ -1,5 +1,5 @@
 function player_coll (body, bodyB, shapeA, shapeB, equation) {
-	//console.log("collision", body);
+	console.log("collision", body);
 	if (!body)
 		return;
 	var key = body.controller.id; 
@@ -7,9 +7,9 @@ function player_coll (body, bodyB, shapeA, shapeB, equation) {
 	var type = body.controller.type;
 	//console.log("collision player", key, type);
 
-	if (type == "player_body") {
+	if (type == "player") {
 		socket.emit('player_collision', {id: key}); 
-	} else if (type == "food_body") {
+	} else if (type == "element") {
 		socket.emit('item_picked', {id: key}); 
 	}
 }
