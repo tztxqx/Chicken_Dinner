@@ -12,5 +12,4 @@ var gameBootstrapper = {
 	}
 };
 
-
 gameBootstrapper.init("gameDiv");
