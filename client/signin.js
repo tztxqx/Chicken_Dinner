@@ -1,6 +1,7 @@
 var signinState = function(game){
 };
 
+var inputName;
 signinState.prototype = {
 	preload:function(){
 		game.load.spritesheet('button', '/client/image/startbutton.png');
@@ -8,10 +9,12 @@ signinState.prototype = {
 
 	create: function(){
 		game.stage.backgroundColor = 0x11A193;
+		//start button
 		button = game.add.button(game.world.centerX - 420, 300, 
 			'button', this.actionOnClick, this);
+		//player's input field
 		game.add.plugin(PhaserInput.Plugin);
-		var input = game.add.inputField(game.world.centerX - 350, 190,{
+		inputName = game.add.inputField(game.world.centerX - 350, 190,{
 			    font: '40px Arial',
 			    fill: '#212121',
 			    fontWeight: 'bold',
@@ -22,10 +25,13 @@ signinState.prototype = {
 			    borderRadius: 6,
 			    placeHolder: 'Your Name',
 			});
+		console.log(inputName);
 
 	},
 
 	actionOnClick: function(){
+		playerName = inputName.value;
+		console.log(inputName.value);
 		this.game.state.start("gameState");
 	},
 	update: function(){

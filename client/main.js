@@ -1,6 +1,9 @@
 var canvas_width = window.innerWidth * window.devicePixelRatio;
 var canvas_height = window.innerHeight * window.devicePixelRatio;
 
+// player's customize name
+var playerName;
+
 //the whole game
 var game = new Phaser.Game(canvas_width,canvas_height, Phaser.CANVAS, 'gameDiv');
 

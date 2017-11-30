@@ -27,10 +27,11 @@ var gameSettings = {
 };
 
 //a player class in the server
-var Player = function (startX, startY) {
+var Player = function (startX, startY, name) {
   this.x = startX;
   this.y = startY;
   this.id;
+  this.name = name;
   this.sendData = true;
 }
 
@@ -104,7 +105,7 @@ function randomInt (low, high) {
 
 function onNewplayer (data) {
 	//new player instance
-	var newPlayer = new Player(randomInt(randomRange.low, randomRange.high), 
+	var newPlayer = new Player(randomInt(randomRange.low, randomRange.high, name), 
 		randomInt(randomRange.low, randomRange.high));
 	console.log(newPlayer);
 	console.log("created new player with id " + this.id);
@@ -115,6 +116,7 @@ function onNewplayer (data) {
 		id: newPlayer.id,
 		x: newPlayer.x,
 		y: newPlayer.y,
+		name: newPlayer.name
 	};
 
 	//send to the new player about everyone who is already connected.
@@ -122,6 +124,7 @@ function onNewplayer (data) {
 		existingPlayer = player_lst[i];
 		var player_info = {
 			id: existingPlayer.id,
+			name: newPlayer.name,
 			x: existingPlayer.x,
 			y: existingPlayer.y,
 		};

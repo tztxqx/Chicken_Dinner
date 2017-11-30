@@ -6,7 +6,10 @@ var body_size = 15;
 var speed_one_direction = 300;
 var speed_two_direction = 240;
 
+//health bar height
 var health_bar_relative_height = 20;
+//player
+var player_name_show_realtive = 20;
 
 var gameProperties = {
 	gameWidth: 4000,
@@ -61,7 +64,8 @@ function onRemovePlayer(data){
 //create my own player
 function createMyPlayer(data){
 	console.log(socket.id);
-	playerDude = new cd_player(data.x, data.y, data.id);
+	playerDude = new cd_player(data.x, data.y, data.id, data.name);
+	console.log(playerDude.player_name);
 	playerDude.player.body.collideWorldBounds = true;
 	game.camera.follow(playerDude.player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	console.log(playerDude);
@@ -73,7 +77,7 @@ function createMyPlayer(data){
 }
 
 //all the player class
-var cd_player = function (startx, starty, id) {
+var cd_player = function (startx, starty, id, name) {
 	this.x = startx;
 	this.y = starty;
 	//this is the unique socket id. We use it as a unique name for enemy
@@ -82,8 +86,13 @@ var cd_player = function (startx, starty, id) {
 
 	this.life_value = 100;
 	//Setup for the health bar;
-	this.health_bar = new HealthBar(game, {width: 100, height: 10, x: this.x, y: this.y - health_bar_relative_height});
+	this.health_bar = new HealthBar(game, {width: 100, height: 10, 
+		x: this.x, y: this.y - health_bar_relative_height});
 	this.health_bar.setPercent(this.life_value);
+
+	//player name show
+	this.player_name = name;
+	this.player_name_show = game.add.text(0, 0, this.player_name);
 
 	this.player = game.add.sprite(this.x, this.y, 'dude');
 	// draw a shape
@@ -96,7 +105,7 @@ var cd_player = function (startx, starty, id) {
 
 //Server told us enemy, create it in the client
 function onNewPlayer(data){
-	var new_enemy = new cd_player(data.x, data.y,data.id);
+	var new_enemy = new cd_player(data.x, data.y,data.id, data.name);
 	enemies.push(new_enemy);
 }
 
@@ -169,8 +178,9 @@ gameState.prototype = {
 		ground.scale.setTo(3, 5);
 		console.log("client started");
 
+		
 		//ask for my player
-		socket.emit("my_player");
+		socket.emit("my_player", playerName);
 		// socket.on("connect", onsocketConnected);
 
 		game.stage.backgroundColor = 0xE1A193;;
@@ -236,6 +246,10 @@ gameState.prototype = {
 				y: playerDude.player.body.y,
 				rotation : playerDude.player.body.rotation,
 			});
+
+			// player name show
+			playerDude.player_name_show.x = playerDude.player.body.x;
+			playerDude.player_name_show.y = playerDude.player.body.y - player_name_show_realtive;
 
 			playerDude.health_bar.setPosition(playerDude.player.body.x,playerDude.player.body.y - health_bar_relative_height);
 			// Change life value can change the value in the health bar

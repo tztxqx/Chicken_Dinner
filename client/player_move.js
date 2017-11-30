@@ -14,6 +14,8 @@ function movetoPointer (player_dude, speed, pointer, maxTime) {
 	player_dude.health_bar.setPosition(player_dude.player.body.x,player_dude.player.body.y - health_bar_relative_height);
 	player_dude.health_bar.setPercent(player_dude.life_value);
 
+	player_dude.player_name_show.x = player_dude.player.body.x;
+	player_dude.player_name_show.y = player_dude.player.body.y - player_name_show_realtive;
 
 	return angle;
 
