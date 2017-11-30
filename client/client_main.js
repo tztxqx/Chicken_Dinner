@@ -2,16 +2,11 @@
 var socket;
 socket = io.connect();
 
-var canvas_width = window.innerWidth * window.devicePixelRatio;
-var canvas_height = window.innerHeight * window.devicePixelRatio;
 var body_size = 15;
 var speed_one_direction = 300;
 var speed_two_direction = 240;
 
 var health_bar_relative_height = 20;
-
-//the whole game
-var game = new Phaser.Game(canvas_width,canvas_height, Phaser.CANVAS, 'gameDiv');
 
 var gameProperties = {
 	gameWidth: 4000,
@@ -235,13 +230,4 @@ gameState.prototype = {
 	}
 }
 
-//return the angle relate to the mouse
 
-var gameBootstrapper = {
-	init: function(gameContainerElementId){
-		game.state.add('gameState', gameState);
-		game.state.start('gameState');
-	}
-};
-
-gameBootstrapper.init("gameDiv");
