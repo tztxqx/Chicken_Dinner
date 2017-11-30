@@ -70,15 +70,13 @@ function createMyPlayer(data){
 	console.log("created");
 }
 
-function player_coll (body, bodyB, shapeA, shapeB, equation) {
-	console.log("collision", body);
-}
 //all the player class
 var cd_player = function (startx, starty, id) {
 	this.x = startx;
 	this.y = starty;
 	//this is the unique socket id. We use it as a unique name for enemy
 	this.id = id;
+	this.type = "player_body";
 
 	this.life_value = 100;
 	//Setup for the health bar;
@@ -89,6 +87,7 @@ var cd_player = function (startx, starty, id) {
 	// draw a shape
 	game.physics.p2.enableBody(this.player);
 	this.player.body.setCircle(body_size);
+	this.player.body.controller = this;
 	this.player.body.onBeginContact.add(player_coll, this);
 }
 
@@ -113,6 +112,15 @@ function onEnemyStateChange (data) {
 	//movePlayer.player.body.y = data.y;
 	movetoPointer(movePlayer, 300, {worldX: data.x, worldY: data.y}, 50);
 	movePlayer.player.body.rotation = data.rotation;
+}
+
+function onPlayerHurt (data) {
+	console.log("hurt");
+	var player = findplayerbyid (data.id);
+	if (data.id == playerDude.id) {
+		player = playerDude;
+	}
+	player.life_value -= data.damage;
 }
 
 //we're receiving the calculated position from the server and changing the player position
@@ -173,6 +181,8 @@ gameState.prototype = {
 		socket.on("enemy_state_change", onEnemyStateChange);
 		// when received remove_player, remove the player passed;
 		socket.on('remove_player', onRemovePlayer);
+		// get hurt
+		socket.on("player_hurt", onPlayerHurt);
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);

@@ -107,7 +107,18 @@ function onClientdisconnect() {
 
 	//send message to every connected client except the sender
 	this.broadcast.emit('remove_player', {id: this.id});
+}
 
+function onTemporary(data) {
+	var movePlayer = find_playerid(this.id);
+	var enemyPlayer = find_playerid(data.id);
+	//console.log(this.id, data.id);
+	if (!movePlayer || !enemyPlayer)
+		return;
+	if (movePlayer.dead || enemyPlayer.dead)
+		return;
+	this.broadcast.emit("player_hurt", {id: this.id, damage: 10});
+	this.emit("player_hurt", {id: this.id, damage: 10});
 }
 
 function onPlayerStateChanged(data){
@@ -141,4 +152,5 @@ io.sockets.on('connection', function(socket){
 	// listen for new player
 	socket.on("my_player", onNewplayer);
 	socket.on("input_control", onPlayerStateChanged);
+	socket.on("player_collision", onTemporary);
 });
