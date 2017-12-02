@@ -96,8 +96,8 @@ function onEnemyStateChange (data) {
 
 	//movePlayer.player.body.x = data.x;
 	//movePlayer.player.body.y = data.y;
-	movetoPointer(movePlayer, 300, {worldX: data.x, worldY: data.y}, 50);
-	movePlayer.body.rotation = data.rotation;
+	movetoPointer(movePlayer, 300, {worldX: data.x, worldY: data.y}, data.rotation, 50);
+	//movePlayer.body.rotation = data.rotation;
 }
 
 function onPlayerHurt (data) {
