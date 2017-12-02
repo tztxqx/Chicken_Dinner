@@ -17,7 +17,7 @@ function finditembyid(id) {
 
 // function called when new food is added in the server.
 function onItemUpdate (data) {
-	console.log("get item", data.x, data.y);
+	//console.log("get item", data.x, data.y);
 	element_pickup.push(new elementObject(data.id, data.x, data.y)); 
 }
 
@@ -54,4 +54,5 @@ var elementObject = function (id, startx, starty, value) {
 	game.physics.p2.enableBody(this.item, true);
 	this.item.body.setCircle(element_size);
 	this.item.body.controller = this;
+	this.item.body.data.shapes[0].sensor = true;
 }

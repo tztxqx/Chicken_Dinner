@@ -67,6 +67,7 @@ function createMyPlayer(data){
 	playerDude = new cd_player(data.x, data.y, data.id, data.name);
 	console.log(playerDude.player_name);
 	playerDude.player.body.collideWorldBounds = true;
+	playerDude.player.body.onBeginContact.add(player_coll);
 	game.camera.follow(playerDude.player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	console.log(playerDude);
 	gameProperties.in_game = true;
@@ -99,7 +100,6 @@ var cd_player = function (startx, starty, id, name) {
 	game.physics.p2.enableBody(this.player);
 	this.player.body.setCircle(body_size);
 	this.player.body.controller = this;
-	this.player.body.onBeginContact.add(player_coll, this);
 }
 
 
