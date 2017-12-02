@@ -1,21 +1,23 @@
 function movetoPointer (player_dude, speed, pointer, maxTime) {
 
-	var displayObject = player_dude.player;
+	var displayObject = player_dude;
+	console.log(displayObject);
 	var angle = angleToPointer(displayObject, pointer);
+
 
 	if (maxTime > 0)
 	{
 		speed = distanceToPointer(displayObject, pointer) / (maxTime / 1000);
 	}
 
-	displayObject.body.velocity.x = Math.cos(angle) * speed;
-	displayObject.body.velocity.y = Math.sin(angle) * speed;
+	displayObject.body.velocity.x = speed * Math.cos(angle);
+	displayObject.body.velocity.y = speed * Math.sin(angle);
 
-	player_dude.health_bar.setPosition(player_dude.player.body.x,player_dude.player.body.y - health_bar_relative_height);
+	player_dude.health_bar.setPosition(player_dude.body.x,player_dude.body.y - health_bar_relative_height);
 	player_dude.health_bar.setPercent(player_dude.life_value);
 
-	player_dude.player_name_show.x = player_dude.player.body.x;
-	player_dude.player_name_show.y = player_dude.player.body.y - player_name_show_realtive;
+	player_dude.player_name_show.x = player_dude.body.x;
+	player_dude.player_name_show.y = player_dude.body.y - player_name_show_realtive;
 
 	return angle;
 
@@ -35,7 +37,6 @@ function distanceToPointer (displayObject, pointer, world) {
 function angleToPointer (displayObject, pointer, world) {
 
 	if (world === undefined) { world = false; }
-
 	if (world)
 	{
 		return Math.atan2(pointer.worldY - displayObject.world.y, pointer.worldX - displayObject.world.x);

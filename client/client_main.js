@@ -2,14 +2,11 @@
 var socket;
 socket = io.connect();
 
-var body_size = 15;
+
 var speed_one_direction = 300;
 var speed_two_direction = 240;
 
-//health bar height
-var health_bar_relative_height = 20;
-//player
-var player_name_show_realtive = 20;
+
 
 var gameProperties = {
 	gameWidth: 4000,
@@ -51,12 +48,12 @@ function onRemovePlayer(data){
 	var removePlayer = findplayerbyid(data.id);
 	// Player not found
 	if (!removePlayer) {
-		console.log('Player not found: ', data.id)
+		console.log('Player not found: ', data.id);
 		return;
 	}
 
 	//removePlayer.health_bar.destroy();
-	removePlayer.player.destroy();
+	removePlayer.destroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 }
 
@@ -64,11 +61,11 @@ function onRemovePlayer(data){
 //create my own player
 function createMyPlayer(data){
 	console.log(socket.id);
-	playerDude = new cd_player(data.x, data.y, data.id, data.name);
-	console.log(playerDude.player_name);
-	playerDude.player.body.collideWorldBounds = true;
-	playerDude.player.body.onBeginContact.add(player_coll);
-	game.camera.follow(playerDude.player, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
+	playerDude = new CdPlayer(data);
+	console.log(playerDude.name);
+	playerDude.body.collideWorldBounds = true;
+	playerDude.body.onBeginContact.add(player_coll);
+	game.camera.follow(playerDude, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	console.log(playerDude);
 	gameProperties.in_game = true;
 
@@ -78,34 +75,12 @@ function createMyPlayer(data){
 }
 
 //all the player class
-var cd_player = function (startx, starty, id, name) {
-	this.x = startx;
-	this.y = starty;
-	//this is the unique socket id. We use it as a unique name for enemy
-	this.id = id;
-	this.type = "player";
 
-	this.life_value = 100;
-	//Setup for the health bar;
-	this.health_bar = new HealthBar(game, {width: 100, height: 10, 
-		x: this.x, y: this.y - health_bar_relative_height});
-	this.health_bar.setPercent(this.life_value);
-
-	//player name show
-	this.player_name = name;
-	this.player_name_show = game.add.text(0, 0, this.player_name);
-
-	this.player = game.add.sprite(this.x, this.y, 'dude');
-	// draw a shape
-	game.physics.p2.enableBody(this.player);
-	this.player.body.setCircle(body_size);
-	this.player.body.controller = this;
-}
 
 
 //Server told us enemy, create it in the client
 function onNewPlayer(data){
-	var new_enemy = new cd_player(data.x, data.y,data.id, data.name);
+	var new_enemy = new CdPlayer(data);
 	enemies.push(new_enemy);
 }
 
@@ -122,7 +97,7 @@ function onEnemyStateChange (data) {
 	//movePlayer.player.body.x = data.x;
 	//movePlayer.player.body.y = data.y;
 	movetoPointer(movePlayer, 300, {worldX: data.x, worldY: data.y}, 50);
-	movePlayer.player.body.rotation = data.rotation;
+	movePlayer.body.rotation = data.rotation;
 }
 
 function onPlayerHurt (data) {
@@ -131,7 +106,7 @@ function onPlayerHurt (data) {
 	if (data.id == playerDude.id) {
 		player = playerDude;
 	}
-	player.life_value -= data.damage;
+	player.health -= data.damage;
 }
 
 //we're receiving the calculated position from the server and changing the player position
@@ -182,9 +157,6 @@ gameState.prototype = {
 		//ask for my player
 		socket.emit("my_player", playerName);
 		// socket.on("connect", onsocketConnected);
-
-		game.stage.backgroundColor = 0xE1A193;;
-		console.log("client started");
 		socket.on("create_player", createMyPlayer);
 		//socket.on("connect", onsocketConnected);
 		//listen to new enemy connections
@@ -202,8 +174,6 @@ gameState.prototype = {
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
-
-
 	},
 
 	processKey: function() {
@@ -233,27 +203,25 @@ gameState.prototype = {
 				key.x *= speed_one_direction;
 				key.y *= speed_one_direction;
 			}
-			playerDude.player.body.velocity.x = key.x;
-			playerDude.player.body.velocity.y = key.y;
-
-			//console.log(playerDude.player.x, playerDude.player.y, playerDude.player.world.x, playerDude.player.world.y);
+			playerDude.body.velocity.x = key.x;
+			playerDude.body.velocity.y = key.y;
 
 			var pointer = game.input.mousePointer;
-			playerDude.player.body.rotation = angleToPointer(playerDude.player, pointer);
+			playerDude.body.rotation = angleToPointer(playerDude, pointer);
 			//console.log("emitting");
 			socket.emit('input_control', {
-				x: playerDude.player.body.x,
-				y: playerDude.player.body.y,
-				rotation : playerDude.player.body.rotation,
+				x: playerDude.body.x,
+				y: playerDude.body.y,
+				rotation : playerDude.body.rotation,
 			});
 
 			// player name show
-			playerDude.player_name_show.x = playerDude.player.body.x;
-			playerDude.player_name_show.y = playerDude.player.body.y - player_name_show_realtive;
+			playerDude.player_name_show.x = playerDude.body.x;
+			playerDude.player_name_show.y = playerDude.body.y - player_name_show_realtive;
 
-			playerDude.health_bar.setPosition(playerDude.player.body.x,playerDude.player.body.y - health_bar_relative_height);
+			playerDude.health_bar.setPosition(playerDude.body.x,playerDude.body.y - health_bar_relative_height);
 			// Change life value can change the value in the health bar
-			playerDude.health_bar.setPercent(playerDude.life_value);
+			playerDude.health_bar.setPercent(playerDude.health);
 		}
 
 	}
