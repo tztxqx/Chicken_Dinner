@@ -1,3 +1,4 @@
+// requirement
 var express = require('express');
 var unique = require('node-uuid');
 
@@ -14,53 +15,62 @@ app.use('/node_modules',express.static(__dirname + '/node_modules'));
 serv.listen(process.env.PORT || 2000);
 console.log("Server started.");
 
-var player_lst = [];
-var item_lst = [];
-var randomRange = {
+// const settings
+var gameSettings = {
 	low : 200,
 	high : 600,
-	mapWidth: 4000,
-	mapHeight: 4000,
-};
-var gameSettings = {
-	item_num : 100
+	width: 4000,
+	height: 4000,
+	itemNum: 100,
 };
 
-//a player class in the server
-var Player = function (startX, startY, name) {
-  this.x = startX;
-  this.y = startY;
-  this.id;
-  this.name = name;
-  this.sendData = true;
+// all lists
+var playerList = [];
+var pickupList = [];
+var flyingList = [];
+
+function findById(id_list) {
+	return function(id){
+		for (var x of id_list) {
+			if (x.id == id)
+				return x;
+		}
+		return null;
+	}
 }
 
-Player.prototype = {
-	canSendData: function() {
-		if (this.sendData) {
-			var that = this;
-			this.sendData = false;
-			setTimeout(function(){that.sendData = true}, 50);
-			return true;
-		} else {
-			return false;
+var findPlayerId = findById(playerList);
+var findPickupId = findById(pickupList);
+var findFlyingId = findById(flyingList);
+
+//game object class in the server
+var GameObject = function(startX, startY, id, name) {
+	this.x = startX;
+	this.y = startY;
+	this.id = id;
+	this.name = name;
+}
+
+GameObject.prototype = {
+	playerInfo: function() {
+		return {
+			x: this.x,
+			y: this.y,
+			id: this.id,
+			name: this.name
 		}
 	}
 };
 
-var Element = function (max_x, max_y, id) {
-	this.x = randomInt(10, max_x - 10);
-	this.y = randomInt(10, max_y - 10);
-	this.id = id;
-};
+// heartBeat checking
+setInterval(heartBeat, 1000/60);
 
-setInterval(heartbeat, 1000/60);
-
-function heartbeat () {
-	var generatenum = gameSettings.item_num - item_lst.length; 
+function heartBeat () {
+	var generatenum = gameSettings.itemNum - pickupList.length; 
 	addElement(generatenum);
 }
 
+// add element
 function addElement(n) {
 	//return if it is not required to create food 
 	if (n <= 0) {
@@ -69,135 +79,90 @@ function addElement(n) {
 	
 	for (var i = 0; i < n; i++) {
 		//create the unique id using node-uuid
-		var unique_id = unique.v4(); 
-		var element = new Element(randomRange.mapWidth, randomRange.mapHeight, unique_id);
-		item_lst.push(element);
+		let uniqueId = unique.v4();
+		let {x, y} = randomGenerate(gameSettings.width, gameSettings.height);
+		let element = new GameObject(x, y, uniqueId, "pickup");
+		pickupList.push(element);
 		//set the food data back to client
-		//console.log("generate element");
-		io.emit("item_update", element);
+		io.emit("new_pickup", element);
 	}
 }
 
-//for finding the id of the enemy
-function find_playerid(id) {
-	for (var i = 0; i < player_lst.length; i++) {
-
-		if (player_lst[i].id == id) {
-			return player_lst[i];
-		}
-	}
-	return false;
+// for generate things randomly
+function randomGenerate(x, y) {
+	return {x: randomInt(10, x - 10), y: randomInt(10, y - 10)};
 }
 
-function find_itemid(id) {
-	for (var i = 0; i < item_lst.length; i++) {
-		if (item_lst[i].id == id) {
-			return item_lst[i];
-		}
-	}
-	return false;
-}
-
-//for generate things randomly
 function randomInt (low, high) {
-    return Math.floor(Math.random() * (high - low) + low);
+    return Math.floor(Math.random() * (high - low + 1) + low);
 }
 
-function onNewplayer (name) {
+// on events
+function onNewplayer (data) {
 	//new player instance
-	var newPlayer = new Player(randomInt(randomRange.low, randomRange.high, name), 
-		randomInt(randomRange.low, randomRange.high));
-	console.log(newPlayer);
+	var {x, y} = randomGenerate(gameSettings.low, gameSettings.high);
+	var newPlayer = new GameObject(x, y, this.id, data.name);
 	console.log("created new player with id " + this.id);
-	newPlayer.id = this.id;
-
-	//information to be sent to all clients except sender
-	var current_info = {
-		id: newPlayer.id,
-		x: newPlayer.x,
-		y: newPlayer.y,
-		name: newPlayer.name
-	};
 
 	//send to the new player about everyone who is already connected.
-	for (i = 0; i < player_lst.length; i++) {
-		existingPlayer = player_lst[i];
-		var player_info = {
-			id: existingPlayer.id,
-			name: newPlayer.name,
-			x: existingPlayer.x,
-			y: existingPlayer.y,
-		};
-		console.log("pushing player");
-		//send message to the sender-client only
-		this.emit("new_enemyPlayer", player_info);
-	}
 	var that = this;
-	item_lst.forEach(function(element) {
-		that.emit("item_update", element);
+	playerList.forEach(function(player) {
+		that.emit("new_enemy", player.playerInfo());
 	});
-	console.log('emit_create');
+	pickupList.forEach(function(pickup) {
+		that.emit("new_pickup", pickup);
+	});
 	//send message to every connected client except the sender
-	this.broadcast.emit('new_enemyPlayer', current_info);
+	this.broadcast.emit('new_enemy', newPlayer.playerInfo());
 
-	player_lst.push(newPlayer);
-	this.emit("create_player", current_info);
-	console.log(player_lst);
+	playerList.push(newPlayer);
+	this.emit("create_player", newPlayer.playerInfo());
 }
 
+function removePlayer() {
+	var currentPlayer = findPlayerId(this.id);
 
-function onClientdisconnect() {
-	console.log('disconnect');
-
-	var removePlayer = find_playerid(this.id);
-
-	if (removePlayer) {
-		player_lst.splice(player_lst.indexOf(removePlayer), 1);
+	if (currentPlayer) {
+		playerList.splice(playerList.indexOf(currentPlayer), 1);
 	}
-
 	console.log("removing player " + this.id);
-
 	//send message to every connected client except the sender
 	this.broadcast.emit('remove_player', {id: this.id});
 }
 
-function onTemporary(data) {
-	var movePlayer = find_playerid(this.id);
-	var enemyPlayer = find_playerid(data.id);
+function onHit(data) {
+	var movePlayer = findPlayerId(this.id);
+	var enemyPlayer = findPlayerId(data.id);
 	//console.log(this.id, data.id);
 	if (!movePlayer || !enemyPlayer)
 		return;
 	if (movePlayer.dead || enemyPlayer.dead)
 		return;
-	io.emit("player_hurt", {id: this.id, damage: 10});
+	io.emit("player_hp_change", {id: this.id, delta: -data.attack});
 }
 
 function onPickup(data) {
-	var movePlayer = find_playerid(this.id);
-	var element = find_itemid(data.id);
+	var movePlayer = findPlayerId(this.id);
+	var element = findPickupId(data.id);
 	//console.log(this.id, data.id);
-	io.emit("player_hurt", {id: this.id, damage: -10});
-	io.emit("remove_item", {id: data.id});
+	io.emit("player_hp_change", {id: this.id, delta: data.gain});
+	io.emit("remove_pickup", {id: data.id});
 }
 
 function onPlayerStateChanged(data){
-	var movePlayer = find_playerid(this.id);
+	var movePlayer = findPlayerId(this.id);
 	if(!movePlayer){
-		console.log("cannot find moved player");
+		//console.log("cannot find moved player");
 		return;
 	}
-	if (!movePlayer.canSendData()) {
-		return;
-	}
-	var current_id = this.id;
-	var current_data ={
-		id: current_id,
+	var currentData ={
+		id: this.id,
 		x : data.x,
 		y : data.y,
 		rotation: data.rotation,
 	};
-	//console.log("where is enemy", current_data);
-	this.broadcast.emit('enemy_state_change', current_data);
+	//console.log("where is enemy", currentData);
+	this.broadcast.emit('enemy_state_change', currentData);
 }
 
  // io connection
@@ -206,10 +171,11 @@ io.sockets.on('connection', function(socket){
 	console.log("socket connected");
 
 	// listen for disconnection;
-	socket.on('disconnect', onClientdisconnect);
+	socket.on('disconnect', removePlayer);
+	socket.on('kill', removePlayer);
 	// listen for new player
 	socket.on("my_player", onNewplayer);
 	socket.on("input_control", onPlayerStateChanged);
-	socket.on("player_collision", onTemporary);
-	socket.on("item_picked", onPickup);
+	socket.on("player_collision", onHit);
+	socket.on("pick_up", onPickup);
 });

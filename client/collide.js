@@ -2,14 +2,18 @@ function player_coll (body, bodyB, shapeA, shapeB, equation) {
 	console.log("collision", body);
 	if (!body)
 		return;
-	var key = body.controller.id; 
+	var gameObject = body.controller;
+	var bodyId = gameObject.id;
+	if (bodyId == playerDude.id) {
+		return;
+	}
 	//the type of the body the player made contact with 
-	var type = body.controller.type;
-	//console.log("collision player", key, type);
+	var type = gameObject.type;
+	//console.log("collision player", bodyId, type);
 
 	if (type == "player") {
-		socket.emit('player_collision', {id: key}); 
+		socket.emit('player_collision', {id: bodyId, attack: gameObject.attack}); 
 	} else if (type == "element") {
-		socket.emit('item_picked', {id: key}); 
+		socket.emit('pick_up', {id: bodyId, gain: gameObject.healthup}); 
 	}
 }

@@ -6,8 +6,6 @@ socket = io.connect();
 var speed_one_direction = 300;
 var speed_two_direction = 240;
 
-
-
 var gameProperties = {
 	gameWidth: 4000,
 	gameHeight: 4000,
@@ -106,7 +104,11 @@ function onPlayerHurt (data) {
 	if (data.id == playerDude.id) {
 		player = playerDude;
 	}
-	player.health -= data.damage;
+	var newHealth = player.health + data.delta;
+	if (newHealth > maxHealth) {
+		newHealth = maxHealth;
+	}
+	player.health = newHealth;
 }
 
 //we're receiving the calculated position from the server and changing the player position
@@ -153,23 +155,22 @@ gameState.prototype = {
 		ground.scale.setTo(3, 5);
 		console.log("client started");
 
-		
 		//ask for my player
-		socket.emit("my_player", playerName);
+		socket.emit("my_player", {name: playerName});
 		// socket.on("connect", onsocketConnected);
 		socket.on("create_player", createMyPlayer);
 		//socket.on("connect", onsocketConnected);
 		//listen to new enemy connections
-		socket.on("new_enemyPlayer", onNewPlayer);
+		socket.on("new_enemy", onNewPlayer);
 		//listen to enemy movement
 		socket.on("enemy_state_change", onEnemyStateChange);
 		// when received remove_player, remove the player passed;
 		socket.on('remove_player', onRemovePlayer);
-		socket.on('remove_item', onItemRemove);
+		socket.on('remove_pickup', onItemRemove);
 		// get hurt
-		socket.on("player_hurt", onPlayerHurt);
+		socket.on("player_hp_change", onPlayerHurt);
 		// get element
-		socket.on("item_update", onItemUpdate);
+		socket.on("new_pickup", onItemUpdate);
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);

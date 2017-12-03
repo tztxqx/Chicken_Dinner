@@ -18,6 +18,9 @@ var health_bar_relative_height = 20;
 //player
 var player_name_show_realtive = 20;
 
+var playerAttack = 10;
+var maxHealth = 100;
+
 // **************
 
 //for CdPlayer info will be {x, y, id, name}
@@ -32,15 +35,16 @@ class CdPlayer extends Phaser.Sprite{
 		// socket id
 		this.id = info.id;
 		this.type = "player"; //currently add will be deleted in the future
+		this.attack = playerAttack;
 
 		//name and name show
 		this.name = info.name;
 		this.player_name_show = game.add.text(0, 0, this.player_name);
 
 		//health and health bar
-		this.health = 100; //same as orial life value initial_health (maxHealth default = 100 in Sprite.maxHealth)
+		this.health = maxHealth; //same as orial life value initial_health (maxHealth default = 100 in Sprite.maxHealth)
 		this.health_bar = new HealthBar(game, {width: 100, height: 10, 
-		wdwx: this.x, y: this.y - health_bar_relative_height});
+			wdwx: this.x, y: this.y - health_bar_relative_height});
 		this.health_bar.setPercent(this.health);
 		
 		//physics enable

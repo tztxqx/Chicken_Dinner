@@ -1,7 +1,7 @@
 function movetoPointer (player_dude, speed, pointer, rotation, maxTime) {
 
 	var displayObject = player_dude;
-	console.log(displayObject);
+	//console.log(displayObject);
 	var angle = angleToPointer(displayObject, pointer);
 
 	var d_rotation = displayObject.rotation - rotation;
