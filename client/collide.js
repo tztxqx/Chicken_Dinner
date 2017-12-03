@@ -1,19 +1,33 @@
-function player_coll (body, bodyB, shapeA, shapeB, equation) {
+function player_coll (body, shapeA, shapeB, equation) {
 	console.log("collision", body);
 	if (!body)
 		return;
 	var gameObject = body.controller;
 	var bodyId = gameObject.id;
-	if (bodyId == playerDude.id) {
-		return;
-	}
 	//the type of the body the player made contact with 
 	var type = gameObject.type;
 	//console.log("collision player", bodyId, type);
 
-	if (type == "player") {
+	if (type === "player") {
 		socket.emit('player_collision', {id: bodyId, attack: gameObject.attack}); 
-	} else if (type == "element") {
-		socket.emit('pick_up', {id: bodyId, gain: gameObject.healthup}); 
+	} else if (type === "pickup") {
+		playerDude.readyToPick = gameObject;
+	}
+}
+
+function player_leave (body, shapeA, shapeB, equation) {
+	console.log("collision", body);
+	if (!body)
+		return;
+	var gameObject = body.controller;
+	var bodyId = gameObject.id;
+	//the type of the body the player made contact with 
+	var type = gameObject.type;
+	//console.log("collision player", bodyId, type);
+
+	if (type === "player") {
+	} else if (type === "pickup") {
+		if (playerDude.readyToPick === gameObject)
+			playerDude.readyToPick = null;
 	}
 }

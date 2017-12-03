@@ -43,6 +43,10 @@ class CdPlayer extends Phaser.Sprite{
 		this.type = "player"; //currently add will be deleted in the future
 		this.attack = playerAttack;
 
+		//properties
+		this.pickupList = [];
+		this.readyToPick = null;
+
 		//name and name show
 		this.name = info.name;
 		this.player_name_show = game.add.text(0, 0, this.player_name);
@@ -56,7 +60,30 @@ class CdPlayer extends Phaser.Sprite{
 		//physics enable
 		cdplayer_game.physics.p2.enableBody(this);
 		this.body.setCircle(body_size);
-		this.body.controller = this; //ask dalao		
+		this.body.controller = this;
+	}
+
+	upgrade() {
+		var result = this.pickupList.map(x => elementToNum[x.name]).sort();
+		if (result[2] == 0) {
+			this.hpChange(10);
+		}
+		this.pickupList = [];
+	}
+
+	pickUp(pickup) {
+		this.pickupList.push(pickup);
+		if (this.pickupList.length == 3) {
+			this.upgrade();
+		}
+	}
+
+	hpChange(delta) {
+		var newHealth = this.health + delta;
+		if (newHealth > maxHealth) {
+			newHealth = maxHealth;
+		}
+		this.health = newHealth;
 	}
 }
 
@@ -96,6 +123,7 @@ function createMyPlayer(data){
 	console.log(playerDude.name);
 	playerDude.body.collideWorldBounds = true;
 	playerDude.body.onBeginContact.add(player_coll);
+	playerDude.body.onEndContact.add(player_leave);
 	game.camera.follow(playerDude, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	console.log(playerDude);
 	gameProperties.in_game = true;
@@ -132,14 +160,9 @@ function onEnemyStateChange (data) {
 }
 
 function onPlayerHurt (data) {
-	console.log("hurt");
-	var player = findplayerbyid (data.id);
+	var player = findplayerbyid(data.id);
 	if (data.id == playerDude.id) {
 		player = playerDude;
 	}
-	var newHealth = player.health + data.delta;
-	if (newHealth > maxHealth) {
-		newHealth = maxHealth;
-	}
-	player.health = newHealth;
+	player.hpChange(data.delta);
 }

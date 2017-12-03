@@ -31,6 +31,7 @@ var gameState = function(game) {
 	this.keyS;
 	this.keyA;
 	this.keyD;
+	this.keyF;
 };
 
 gameState.prototype = {
@@ -69,7 +70,7 @@ gameState.prototype = {
 		socket.on("enemy_state_change", onEnemyStateChange);
 		// when received remove_player, remove the player passed;
 		socket.on('remove_player', onRemovePlayer);
-		socket.on('remove_pickup', onItemRemove);
+		socket.on('player_pickup', onPlayerPickup);
 		// get hurt
 		socket.on("player_hp_change", onPlayerHurt);
 		// get element
@@ -78,6 +79,8 @@ gameState.prototype = {
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
+		this.keyF = game.input.keyboard.addKey(Phaser.Keyboard.F);
+		
 	},
 
 	processKey: function() {
@@ -113,11 +116,16 @@ gameState.prototype = {
 			var pointer = game.input.mousePointer;
 			playerDude.body.rotation = angleToPointer(playerDude, pointer);
 			//console.log("emitting");
-			socket.emit('input_control', {
+			var inputSet = {
 				x: playerDude.body.x,
 				y: playerDude.body.y,
 				rotation : playerDude.body.rotation,
-			});
+			};
+			if (this.keyF.isDown && playerDude.readyToPick) {
+				inputSet.pickId = playerDude.readyToPick.id;
+			}
+
+			socket.emit('input_control', inputSet);
 
 			// player name show
 			playerDude.player_name_show.x = playerDude.body.x;

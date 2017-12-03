@@ -141,12 +141,14 @@ function onHit(data) {
 	io.emit("player_hp_change", {id: this.id, delta: -data.attack});
 }
 
-function onPickup(data) {
-	var movePlayer = findPlayerId(this.id);
-	var element = findPickupId(data.id);
+function pickUp(playerId, pickupId) {
+	var player = findPlayerId(playerId);
+	var pickup = findPickupId(pickupId);
+	if (!player || !pickup)
+		return;
 	//console.log(this.id, data.id);
-	io.emit("player_hp_change", {id: this.id, delta: data.gain});
-	io.emit("remove_pickup", {id: data.id});
+	pickupList.splice(pickupList.indexOf(pickup), 1);
+	io.emit("player_pickup", {playerId: playerId, pickupId: pickupId});
 }
 
 function onPlayerStateChanged(data){
@@ -163,6 +165,7 @@ function onPlayerStateChanged(data){
 	};
 	//console.log("where is enemy", currentData);
 	this.broadcast.emit('enemy_state_change', currentData);
+	pickUp(this.id, data.pickId);
 }
 
  // io connection
@@ -177,5 +180,4 @@ io.sockets.on('connection', function(socket){
 	socket.on("my_player", onNewplayer);
 	socket.on("input_control", onPlayerStateChanged);
 	socket.on("player_collision", onHit);
-	socket.on("pick_up", onPickup);
 });

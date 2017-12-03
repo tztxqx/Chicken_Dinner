@@ -8,6 +8,13 @@ var pickupObjectSize = 10;
 
 //cdplayer_image show
 var pickupObjectImage = 'element';
+var elementToNum = {
+	water: 0,
+	fire: 1,
+	thunder: 2,
+	wind: 3,
+	earth: 4,
+};
 
 
 //for pickup info will be {x,y,id,healthupAmount}
@@ -22,7 +29,8 @@ class PickupObject extends Phaser.Sprite{
 		// unique id for the food.
 		//generated in the server with node-uuid
 		this.id = info.id;
-		this.type = "element";
+		this.type = "pickup";
+		this.name = "water";
 		this.healthup = info.healthupAmount
 
 		//physics enable
@@ -41,7 +49,7 @@ function finditembyid(id) {
 	
 	for (var i = 0; i < pickupObjectList.length; i++) {
 
-		if (pickupObjectList[i].id == id) {
+		if (pickupObjectList[i].id === id) {
 			return pickupObjectList[i]; 
 		}
 	}
@@ -56,12 +64,16 @@ function onItemUpdate (data) {
 }
 
 // function called when food needs to be removed in the client. 
-function onItemRemove (data) {
-	
-	var removeItem; 
-	removeItem = finditembyid(data.id);
-	pickupObjectList.splice(pickupObjectList.indexOf(removeItem), 1); 
-	
-	//destroy the phaser object 
-	removeItem.destroy(true,false);	
+function onPlayerPickup (data) {
+	var player = findplayerbyid(data.playerId);
+	var pickup = finditembyid(data.pickupId);
+	if (data.playerId === playerDude.id) {
+		player = playerDude;
+	}
+	if (!player || !pickup)
+		return;
+	player.pickUp(pickup);
+	pickupObjectList.splice(pickupObjectList.indexOf(pickup), 1); 
+	//destroy the phaser object
+	pickup.destroy(true,false);	
 }
