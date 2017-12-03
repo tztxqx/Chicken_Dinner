@@ -26,6 +26,9 @@ class CdPlayer extends Phaser.Sprite{
 		super(cdplayer_game, info.x, info.y, 
 		cdplayer_image);  // || for default
 		
+		//add to game
+		cdplayer_game.add.existing(this);
+
 		// socket id
 		this.id = info.id;
 		this.type = "player"; //currently add will be deleted in the future
@@ -43,10 +46,7 @@ class CdPlayer extends Phaser.Sprite{
 		//physics enable
 		cdplayer_game.physics.p2.enableBody(this);
 		this.body.setCircle(body_size);
-		this.body.controller = this; //ask dalao
-
-		//add game
-		cdplayer_game.add.existing(this);
+		this.body.controller = this; //ask dalao		
 	}
 }
 

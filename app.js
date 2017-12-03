@@ -186,7 +186,6 @@ function onPlayerStateChanged(data){
 		console.log("cannot find moved player");
 		return;
 	}
-	console.log(movePlayer.sendData);
 	if (!movePlayer.canSendData()) {
 		return;
 	}

@@ -12,7 +12,7 @@ function movetoPointer (player_dude, speed, pointer, rotation, maxTime) {
 		d_rotation_final = d_rotation - 2 * Math. PI;
 	}
 	else if(d_rotation < -Math.PI){
-		d_rotation_final = d_raotation + 2 * Math.PI;
+		d_rotation_final = d_rotation + 2 * Math.PI;
 	}
 	else{
 		d_rotation_final = d_rotation;
