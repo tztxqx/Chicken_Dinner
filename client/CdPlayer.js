@@ -9,7 +9,7 @@ var playerDude;
 var enemies = [];
 
 // for the game cdplayer in
-var cdplayer_game = game;
+var cdplayerGame = game;
 
 //show related area  (will be changed to Dictionary)*************
 
@@ -32,11 +32,11 @@ var maxHealth = 100;
 //for CdPlayer info will be {x, y, id, name}
 class CdPlayer extends Phaser.Sprite{
 	constructor(info) {
-		super(cdplayer_game, info.x, info.y, 
+		super(cdplayerGame, info.x, info.y, 
 		cdplayer_image);  // info.image || for default
 		
 		//add to game
-		cdplayer_game.add.existing(this);
+		cdplayerGame.add.existing(this);
 
 		// socket id
 		this.id = info.id;
@@ -49,7 +49,7 @@ class CdPlayer extends Phaser.Sprite{
 
 		//name and name show
 		this.name = info.name;
-		this.player_name_show = game.add.text(0, 0, this.player_name);
+		this.player_name_show = cdplayerGame.add.text(this.x, this.y, this.name);
 
 		//health and health bar
 		this.health = maxHealth; //same as orial life value initial_health (maxHealth default = 100 in Sprite.maxHealth)
@@ -58,7 +58,7 @@ class CdPlayer extends Phaser.Sprite{
 		this.health_bar.setPercent(this.health);
 		
 		//physics enable
-		cdplayer_game.physics.p2.enableBody(this);
+		cdplayerGame.physics.p2.enableBody(this);
 		this.body.setCircle(body_size);
 		this.body.controller = this;
 	}
@@ -84,6 +84,13 @@ class CdPlayer extends Phaser.Sprite{
 			newHealth = maxHealth;
 		}
 		this.health = newHealth;
+	}
+
+	//also destroy health bar and name_show
+	realDestroy(){
+		this.health_bar.kill();
+		this.player_name_show.destroy();
+		this.destroy();
 	}
 }
 
@@ -111,7 +118,7 @@ function onRemovePlayer(data){
 	}
 
 	//removePlayer.health_bar.destroy();
-	removePlayer.destroy();
+	removePlayer.realDestroy();
 	enemies.splice(enemies.indexOf(removePlayer), 1);
 }
 

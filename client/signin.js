@@ -1,6 +1,9 @@
 var signinState = function(game){
 };
 
+// player's customize name
+var playerName;
+
 var inputName;
 signinState.prototype = {
 	preload:function(){
@@ -30,7 +33,7 @@ signinState.prototype = {
 	},
 
 	actionOnClick: function(){
-		playerName = inputName.value;
+		playerName = inputName.value || "unknown";
 		console.log(inputName.value);
 		this.game.state.start("gameState");
 	},
