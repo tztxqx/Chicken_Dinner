@@ -2,7 +2,6 @@
 var socket;
 socket = io.connect();
 
-
 var speed_one_direction = 300;
 var speed_two_direction = 240;
 
@@ -13,23 +12,11 @@ var gameProperties = {
 	in_game: false,
 };
 
-//the enemy player list
-var enemies = [];
-var items = [];
+
 
 //variables
 var keyboardInput;
-// player's character
-var playerDude;
 
-//for finding the id of the enemy
-function findplayerbyid (id) {
-	for (var i = 0; i < enemies.length; i++) {
-		if (enemies[i].id == id) {
-			return enemies[i];
-		}
-	}
-}
 
 //hard to trigger
 // function onsocketConnected () {
@@ -39,91 +26,6 @@ function findplayerbyid (id) {
 // 	// send the server our initial position and tell it we are connected
 // 	socket.emit('new_player', {x: 32, y: 400});
 // }
-
-// When the server notifies us of client disconnection, we find the disconnected
-// enemy and remove from our game
-function onRemovePlayer(data){
-	var removePlayer = findplayerbyid(data.id);
-	// Player not found
-	if (!removePlayer) {
-		console.log('Player not found: ', data.id);
-		return;
-	}
-
-	//removePlayer.health_bar.destroy();
-	removePlayer.destroy();
-	enemies.splice(enemies.indexOf(removePlayer), 1);
-}
-
-
-//create my own player
-function createMyPlayer(data){
-	console.log(socket.id);
-	playerDude = new CdPlayer(data);
-	console.log(playerDude.name);
-	playerDude.body.collideWorldBounds = true;
-	playerDude.body.onBeginContact.add(player_coll);
-	game.camera.follow(playerDude, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
-	console.log(playerDude);
-	gameProperties.in_game = true;
-
-	//camera follow
-	//game.camera.follow(playerDude, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
-	console.log("created");
-}
-
-//all the player class
-
-
-
-//Server told us enemy, create it in the client
-function onNewPlayer(data){
-	var new_enemy = new CdPlayer(data);
-	enemies.push(new_enemy);
-}
-
-//Server tells us there is a new enemy state change. We find the moved enemy
-//and sync the enemy movement with the server
-function onEnemyStateChange (data) {
-	var movePlayer = findplayerbyid (data.id);
-
-	if (!movePlayer) {
-		return;
-	}
-	//console.log("enemy_state_change");
-
-	//movePlayer.player.body.x = data.x;
-	//movePlayer.player.body.y = data.y;
-	movetoPointer(movePlayer, 300, {worldX: data.x, worldY: data.y}, data.rotation, 50);
-	//movePlayer.body.rotation = data.rotation;
-}
-
-function onPlayerHurt (data) {
-	console.log("hurt");
-	var player = findplayerbyid (data.id);
-	if (data.id == playerDude.id) {
-		player = playerDude;
-	}
-	var newHealth = player.health + data.delta;
-	if (newHealth > maxHealth) {
-		newHealth = maxHealth;
-	}
-	player.health = newHealth;
-}
-
-//we're receiving the calculated position from the server and changing the player position
-function onInputRecieved (data) {
-	//we're forming a new pointer with the new position
-	var newPointer = {
-		x: data.x,
-		y: data.y,
-		worldX: data.x,
-		worldY: data.y,
-	}
-
-}
-
-//main state
 var gameState = function(game) {
 	this.keyW;
 	this.keyS;
@@ -144,6 +46,7 @@ gameState.prototype = {
 		//game.physics.p2.enableBody(game.physics.p2.walls);
 		game.load.image('ground', '/client/image/platform.png');
 		game.load.spritesheet('dude', '/client/image/dude.png', 32, 48);
+		game.load.spritesheet('element','/client/image/bluecircle.png');
 
     },
 
