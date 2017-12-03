@@ -59,6 +59,14 @@ GameObject.prototype = {
 			id: this.id,
 			name: this.name
 		}
+	},
+	pickupInfo: function() {
+		return {
+			x: this.x,
+			y: this.y,
+			id: this.id,
+			name: this.name
+		}
 	}
 };
 
@@ -81,10 +89,10 @@ function addElement(n) {
 		//create the unique id using node-uuid
 		let uniqueId = unique.v4();
 		let {x, y} = randomGenerate(gameSettings.width, gameSettings.height);
-		let element = new GameObject(x, y, uniqueId, "pickup");
+		let element = new GameObject(x, y, uniqueId, randomInt(0, 4));
 		pickupList.push(element);
 		//set the food data back to client
-		io.emit("new_pickup", element);
+		io.emit("new_pickup", element.pickupInfo());
 	}
 }
 
@@ -138,7 +146,7 @@ function onHit(data) {
 		return;
 	if (movePlayer.dead || enemyPlayer.dead)
 		return;
-	io.emit("player_hp_change", {id: this.id, delta: -data.attack});
+	io.emit("player_hp_change", {id: data.id, delta: -data.attack});
 }
 
 function pickUp(playerId, pickupId) {
@@ -179,5 +187,5 @@ io.sockets.on('connection', function(socket){
 	// listen for new player
 	socket.on("my_player", onNewplayer);
 	socket.on("input_control", onPlayerStateChanged);
-	socket.on("player_collision", onHit);
+	socket.on("player_hit", onHit);
 });

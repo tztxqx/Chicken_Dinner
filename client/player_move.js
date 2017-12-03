@@ -29,6 +29,7 @@ function movetoPointer (player_dude, speed, pointer, rotation, maxTime) {
 
 	// smooth player to pointer
 	displayObject.body.angularVelocity = angular_speed;
+	player_dude.setHealthBar();
 
 	player_dude.health_bar.setPosition(player_dude.body.x,player_dude.body.y - health_bar_relative_height);
 	player_dude.health_bar.setPercent(player_dude.health);

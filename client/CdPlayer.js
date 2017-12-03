@@ -23,9 +23,16 @@ var body_size = 15;
 var health_bar_relative_height = 20;
 //player
 var player_name_show_realtive = 20;
+var speed_one_direction = 300;
+var speed_two_direction = 0.8;
 
 var playerAttack = 10;
 var maxHealth = 100;
+var waterRecover = 30;
+var fireAttack = 1;
+var thunderUp = 20;
+var windBoost = 0.3;
+var earthImprove = 10;
 
 // **************
 
@@ -42,6 +49,7 @@ class CdPlayer extends Phaser.Sprite{
 		this.id = info.id;
 		this.type = "player"; //currently add will be deleted in the future
 		this.attack = playerAttack;
+		this.boost = 1.0;
 
 		//properties
 		this.pickupList = [];
@@ -53,9 +61,10 @@ class CdPlayer extends Phaser.Sprite{
 
 		//health and health bar
 		this.health = maxHealth; //same as orial life value initial_health (maxHealth default = 100 in Sprite.maxHealth)
+		this.maxHealth = maxHealth;
 		this.health_bar = new HealthBar(game, {width: 100, height: 10, 
 			wdwx: this.x, y: this.y - health_bar_relative_height});
-		this.health_bar.setPercent(this.health);
+		this.health_bar.setPercent(100);
 		
 		//physics enable
 		cdplayerGame.physics.p2.enableBody(this);
@@ -63,11 +72,31 @@ class CdPlayer extends Phaser.Sprite{
 		this.body.controller = this;
 	}
 
+	setHealthBar() {
+		this.health_bar.setPosition(this.body.x, this.body.y - health_bar_relative_height);
+		this.health_bar.setPercent(this.health / this.maxHealth * 100);
+	}
+
 	upgrade() {
 		var result = this.pickupList.map(x => elementToNum[x.name]).sort();
-		if (result[2] == 0) {
-			this.hpChange(10);
+		var that = this;
+		if (result[0] == result[1] || result[1] == result[2]) {
+			if (result[1] == 0)
+				this.hpChange(waterRecover);
+			else if (result[1] == 1) {
+				enemies.forEach(function(player) {
+					socket.emit("player_hit", {id: player.id, attack: fireAttack * that.attack});
+				});
+			} else if (result[1] == 2) {
+				this.attack += thunderUp;
+			} else if (result[1] == 3) {
+				this.boost += windBoost;
+			} else if (result[1] == 4) {
+				this.health += earthImprove;
+				this.maxHealth += earthImprove;
+			}
 		}
+		this.setHealthBar();
 		this.pickupList = [];
 	}
 
@@ -78,12 +107,25 @@ class CdPlayer extends Phaser.Sprite{
 		}
 	}
 
+	speedBoost(p) {
+		var bst = this.boost * speed_one_direction;
+		if (p.x && p.y) {
+			bst *= speed_two_direction;
+		}
+		if (p.shift) bst *= 1.1;
+		return {
+			x: p.x * bst,
+			y: p.y * bst,
+		}
+	}
+
 	hpChange(delta) {
 		var newHealth = this.health + delta;
 		if (newHealth > maxHealth) {
 			newHealth = maxHealth;
 		}
 		this.health = newHealth;
+		this.setHealthBar();
 	}
 
 	//also destroy health bar and name_show

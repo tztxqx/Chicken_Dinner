@@ -9,7 +9,7 @@ function player_coll (body, shapeA, shapeB, equation) {
 	//console.log("collision player", bodyId, type);
 
 	if (type === "player") {
-		socket.emit('player_collision', {id: bodyId, attack: gameObject.attack}); 
+		socket.emit('player_hit', {id: bodyId, attack: playerDude.attack}); 
 	} else if (type === "pickup") {
 		playerDude.readyToPick = gameObject;
 	}

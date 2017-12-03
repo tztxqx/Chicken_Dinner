@@ -2,9 +2,6 @@
 var socket;
 socket = io.connect();
 
-var speed_one_direction = 300;
-var speed_two_direction = 240;
-
 var gameProperties = {
 	gameWidth: 4000,
 	gameHeight: 4000,
@@ -32,7 +29,10 @@ var gameState = function(game) {
 	this.keyA;
 	this.keyD;
 	this.keyF;
+	this.keyShift;
 };
+
+var countFrame = 0;
 
 gameState.prototype = {
 	preload: function() {
@@ -47,8 +47,11 @@ gameState.prototype = {
 		//game.physics.p2.enableBody(game.physics.p2.walls);
 		game.load.image('ground', '/client/image/platform.png');
 		game.load.spritesheet('dude', '/client/image/dude.png', 32, 48);
-		game.load.spritesheet('element','/client/image/bluecircle.png');
-
+		game.load.spritesheet(numToElement[0],'/client/image/water_image.png');
+		game.load.spritesheet(numToElement[1],'/client/image/fire_image.png');
+		game.load.spritesheet(numToElement[2],'/client/image/thunder_image.png');
+		game.load.spritesheet(numToElement[3],'/client/image/wind_image.png');
+		game.load.spritesheet(numToElement[4],'/client/image/earth_image.png');
     },
 
 	create: function () {
@@ -80,11 +83,11 @@ gameState.prototype = {
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
 		this.keyF = game.input.keyboard.addKey(Phaser.Keyboard.F);
-		
+		this.keyShift = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
 	},
 
 	processKey: function() {
-		var key = {x: 0, y: 0};
+		var key = {x: 0, y: 0, f: 0};
 		if (this.keyW.isDown) {
 			key.y = -1;
 		} else if (this.keyS.isDown) {
@@ -95,23 +98,27 @@ gameState.prototype = {
 		} else if (this.keyD.isDown) {
 			key.x = 1;
 		}
+		if (this.keyF.isDown) {
+			key.f = 1;
+		}
+		if (this.keyShift.isDown) {
+			key.shift = 1;
+		}
 		return key;
 	},
 
 	update: function () {
+		countFrame ++;
+		if (countFrame % 2 != 0) {
+			return;
+		}
 		if (gameProperties.in_game) {
 
 			//keyboardInput = game.input.keyboard.createCursorKeys();
 			var key = this.processKey();
-			if (key.x != 0 && key.y != 0) {
-				key.x *= speed_two_direction;
-				key.y *= speed_two_direction;
-			} else {
-				key.x *= speed_one_direction;
-				key.y *= speed_one_direction;
-			}
-			playerDude.body.velocity.x = key.x;
-			playerDude.body.velocity.y = key.y;
+			var speed = playerDude.speedBoost(key);
+			playerDude.body.velocity.x = speed.x;
+			playerDude.body.velocity.y = speed.y;
 
 			var pointer = game.input.mousePointer;
 			playerDude.body.rotation = angleToPointer(playerDude, pointer);
@@ -121,7 +128,7 @@ gameState.prototype = {
 				y: playerDude.body.y,
 				rotation : playerDude.body.rotation,
 			};
-			if (this.keyF.isDown && playerDude.readyToPick) {
+			if (key.f && playerDude.readyToPick) {
 				inputSet.pickId = playerDude.readyToPick.id;
 			}
 
@@ -131,9 +138,9 @@ gameState.prototype = {
 			playerDude.player_name_show.x = playerDude.body.x;
 			playerDude.player_name_show.y = playerDude.body.y - player_name_show_realtive;
 
-			playerDude.health_bar.setPosition(playerDude.body.x,playerDude.body.y - health_bar_relative_height);
+			playerDude.setHealthBar();
 			// Change life value can change the value in the health bar
-			playerDude.health_bar.setPercent(playerDude.health);
+			//playerDude.health_bar.setPercent(playerDude.health / playerDude.maxHealth * 100);
 		}
 
 	}
