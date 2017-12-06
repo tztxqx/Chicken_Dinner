@@ -7,13 +7,6 @@ var pickupObjectSize = 10;
 
 
 //cdplayer_image show
-var elementToNum = {
-	water: 0,
-	fire: 1,
-	thunder: 2,
-	wind: 3,
-	earth: 4,
-};
 var numToElement = ['water', 'fire', 'thunder', 'wind', 'earth'];
 
 
@@ -30,7 +23,7 @@ class PickupObject extends Phaser.Sprite{
 		//generated in the server with node-uuid
 		this.id = info.id;
 		this.type = "pickup";
-		this.name = numToElement[info.name];
+		this.name = info.name;
 
 		//physics enable
 		pickupObjectGame.physics.p2.enableBody(this);

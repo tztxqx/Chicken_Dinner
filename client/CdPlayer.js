@@ -53,7 +53,6 @@ class CdPlayer extends Phaser.Sprite{
 
 		//properties
 		this.pickupList = [];
-		this.readyToPick = null;
 
 		//name and name show
 		this.name = info.name;
@@ -78,15 +77,12 @@ class CdPlayer extends Phaser.Sprite{
 	}
 
 	upgrade() {
-		var result = this.pickupList.map(x => elementToNum[x.name]).sort();
+		var result = this.pickupList.map(x => Number(x.name)).sort();
 		var that = this;
 		if (result[0] == result[1] || result[1] == result[2]) {
 			if (result[1] == 0)
 				this.hpChange(waterRecover);
 			else if (result[1] == 1) {
-				enemies.forEach(function(player) {
-					socket.emit("player_hit", {id: player.id, attack: fireAttack * that.attack});
-				});
 			} else if (result[1] == 2) {
 				this.attack += thunderUp;
 			} else if (result[1] == 3) {
@@ -105,6 +101,13 @@ class CdPlayer extends Phaser.Sprite{
 		if (this.pickupList.length == 3) {
 			this.upgrade();
 		}
+	}
+
+	fire() {
+		if (game.time.now > this.fireTime) {
+			this.fireTime = game.time.now + this.fireRate;
+			return true;
+		} else return false;
 	}
 
 	speedBoost(p) {
@@ -171,6 +174,10 @@ function createMyPlayer(data){
 	playerDude = new CdPlayer(data);
 	console.log(playerDude.name);
 	playerDude.body.collideWorldBounds = true;
+	playerDude.fireRate = 200;
+	playerDude.fireTime = 0;
+	playerDude.readyToPick = null;
+
 	playerDude.body.onBeginContact.add(player_coll);
 	playerDude.body.onEndContact.add(player_leave);
 	game.camera.follow(playerDude, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
@@ -212,6 +219,9 @@ function onPlayerHurt (data) {
 	var player = findplayerbyid(data.id);
 	if (data.id == playerDude.id) {
 		player = playerDude;
+	}
+	if (!player) {
+		return;
 	}
 	player.hpChange(data.delta);
 }

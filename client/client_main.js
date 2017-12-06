@@ -52,6 +52,7 @@ gameState.prototype = {
 		game.load.spritesheet(numToElement[2],'/client/image/thunder_image.png');
 		game.load.spritesheet(numToElement[3],'/client/image/wind_image.png');
 		game.load.spritesheet(numToElement[4],'/client/image/earth_image.png');
+		game.load.spritesheet(numToFlying[0],'/client/image/fire_image.png');
     },
 
 	create: function () {
@@ -76,18 +77,21 @@ gameState.prototype = {
 		socket.on('player_pickup', onPlayerPickup);
 		// get hurt
 		socket.on("player_hp_change", onPlayerHurt);
+		socket.on("player_hit", onPlayerHit);
 		// get element
 		socket.on("new_pickup", onItemUpdate);
+		socket.on("new_flying", onNewFlying);
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
 		this.keyF = game.input.keyboard.addKey(Phaser.Keyboard.F);
 		this.keyShift = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
+		this.mouseL = game.input.activePointer.leftButton;
 	},
 
 	processKey: function() {
-		var key = {x: 0, y: 0, f: 0};
+		var key = {x: 0, y: 0, f: 0, shift: 0, fire: 0};
 		if (this.keyW.isDown) {
 			key.y = -1;
 		} else if (this.keyS.isDown) {
@@ -103,6 +107,9 @@ gameState.prototype = {
 		}
 		if (this.keyShift.isDown) {
 			key.shift = 1;
+		}
+		if (this.mouseL.isDown) {
+			key.fire = 1;
 		}
 		return key;
 	},
@@ -130,6 +137,10 @@ gameState.prototype = {
 			};
 			if (key.f && playerDude.readyToPick) {
 				inputSet.pickId = playerDude.readyToPick.id;
+			}
+			if (key.fire && playerDude.fire()) {
+				inputSet.fire = 1;
+				inputSet.attack = playerDude.attack;
 			}
 
 			socket.emit('input_control', inputSet);
