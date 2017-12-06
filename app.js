@@ -57,7 +57,9 @@ GameObject.prototype = {
 			x: this.x,
 			y: this.y,
 			id: this.id,
-			name: this.name
+			name: this.name,
+			health: this.health,
+			maxHealth: this.maxHealth,
 		}
 	},
 	pickupInfo: function() {
@@ -65,7 +67,18 @@ GameObject.prototype = {
 			x: this.x,
 			y: this.y,
 			id: this.id,
-			name: this.name
+			name: this.name,
+		}
+	},
+	flyingInfo: function() {
+		return {
+			x: this.x,
+			y: this.y,
+			id: this.id,
+			name: this.name,
+			rotation: this.rotation,
+			owner: this.owner,
+			attack: this.attack,
 		}
 	}
 };
@@ -140,13 +153,11 @@ function removePlayer() {
 
 function onHit(data) {
 	var movePlayer = findPlayerId(this.id);
-	var enemyPlayer = findPlayerId(data.id);
+	var flying = findFlyingId(data.id);
 	//console.log(this.id, data.id);
-	if (!movePlayer || !enemyPlayer)
+	if (!movePlayer || !flying)
 		return;
-	if (movePlayer.dead || enemyPlayer.dead)
-		return;
-	io.emit("player_hp_change", {id: data.id, delta: -data.attack});
+	io.emit("player_hit", {playerId: this.id, flyingId: data.id});
 }
 
 function pickUp(playerId, pickupId) {
@@ -159,13 +170,23 @@ function pickUp(playerId, pickupId) {
 	io.emit("player_pickup", {playerId: playerId, pickupId: pickupId});
 }
 
+function newFire(playerId, data) {
+	var uniqueId = unique.v4();
+	var flying = new GameObject(data.x, data.y, uniqueId, 0);
+	flying.rotation = data.rotation;
+	flying.attack = data.attack;
+	flying.owner = playerId;
+	flyingList.push(flying);
+	io.emit('new_flying', flying.flyingInfo());
+}
+
 function onPlayerStateChanged(data){
 	var movePlayer = findPlayerId(this.id);
 	if(!movePlayer){
 		//console.log("cannot find moved player");
 		return;
 	}
-	var currentData ={
+	var currentData = {
 		id: this.id,
 		x : data.x,
 		y : data.y,
@@ -173,7 +194,12 @@ function onPlayerStateChanged(data){
 	};
 	//console.log("where is enemy", currentData);
 	this.broadcast.emit('enemy_state_change', currentData);
-	pickUp(this.id, data.pickId);
+	if (data.pickId) {
+		pickUp(this.id, data.pickId);
+	}
+	if (data.fire) {
+		newFire(this.id, data);
+	}
 }
 
  // io connection
