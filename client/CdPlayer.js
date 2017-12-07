@@ -44,6 +44,7 @@ class CdPlayer extends Phaser.Sprite{
 		
 		//add to game
 		cdplayerGame.add.existing(this);
+		playerLayer.add(this);
 
 		// socket id
 		this.id = info.id;
@@ -137,10 +138,11 @@ class CdPlayer extends Phaser.Sprite{
 	}
 
 	//also destroy health bar and name_show
-	realDestroy(){
+	destroy(){
 		this.health_bar.kill();
 		this.player_name_show.destroy();
-		this.destroy();
+		enemies.splice(enemies.indexOf(this), 1);
+		super.destroy();
 	}
 }
 
@@ -168,8 +170,7 @@ function onRemovePlayer(data){
 	}
 
 	//removePlayer.health_bar.destroy();
-	removePlayer.realDestroy();
-	enemies.splice(enemies.indexOf(removePlayer), 1);
+	removePlayer.destroy();
 }
 
 

@@ -14,12 +14,14 @@ class FlyingObject extends Phaser.Sprite{
 		
 		//add to game
 		flyingObjectGame.add.existing(this);
+		flyingLayer.add(this);
 
 		this.id = info.id;
 		this.type = "flying";
 		this.owner = info.owner;
 		this.name = info.name;
 		this.attack = info.attack * flyingConst.attack;
+		this.lifespan = flyingConst.lifespan;
 
 		//physics enable
 		this.scale.set(flyingConst.size / spriteSize);
@@ -34,6 +36,16 @@ class FlyingObject extends Phaser.Sprite{
 	}
 
 	hitPlayer(player) {
+	}
+
+	kill() {
+		flyingObjectList.splice(flyingObjectList.indexOf(this), 1);
+		super.destroy();
+	}
+
+	destroy() {
+		flyingObjectList.splice(flyingObjectList.indexOf(this), 1);
+		super.destroy();
 	}
 }
 
@@ -78,12 +90,14 @@ var flyingInfo = [{
 	speed: 1200,
 	size: 10,
 	attack: 1,
+	lifespan: 1000,
 	factory: Fireball,
 }, {
 	name: 'thunder',
 	size: 30,
 	attack: 0.8,
 	affects: true,
+	lifespan: 200,
 	factory: Trap,
 }];
 
@@ -93,11 +107,6 @@ function findflyingbyid(id) {
 		if (x.id === id) return x;
 	}
 	return false; 
-}
-
-function destroyFlying(flying) {
-	flyingObjectList.splice(flyingObjectList.indexOf(flying), 1);
-	flying.destroy(true,false);
 }
 
 // function called when new food is added in the server.
@@ -117,6 +126,6 @@ function onPlayerHit (data) {
 	if (!player || !flying)
 		return;
 	if (flying.hitPlayer(player)) {
-		destroyFlying(flying);
+		flying.kill();
 	}
 }

@@ -33,6 +33,10 @@ var gameState = function(game) {
 };
 
 var countFrame = 0;
+var mapWalls;
+var pickupLayer;
+var flyingLayer;
+var playerLayer;
 
 gameState.prototype = {
 	preload: function() {
@@ -59,6 +63,10 @@ gameState.prototype = {
 	create: function () {
 		game.stage.backgroundColor = 0xE1A193;
 		mapWalls = game.add.group();
+		flyingLayer = game.add.group();
+		pickupLayer = game.add.group();
+		playerLayer = game.add.group();
+
 		mapWalls.enableBody = true;
 		var ground = mapWalls.create(0, 0, 'ground');
 		ground.scale.setTo(3, 5);

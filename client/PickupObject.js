@@ -18,6 +18,7 @@ class PickupObject extends Phaser.Sprite{
 		
 		//add to game
 		pickupObjectGame.add.existing(this);
+		pickupLayer.add(this);
 
 		// unique id for the food.
 		//generated in the server with node-uuid
@@ -42,11 +43,11 @@ function finditembyid(id) {
 	for (var i = 0; i < pickupObjectList.length; i++) {
 
 		if (pickupObjectList[i].id === id) {
-			return pickupObjectList[i]; 
+			return pickupObjectList[i];
 		}
 	}
 	
-	return false; 
+	return false;
 }
 
 // function called when new food is added in the server.
