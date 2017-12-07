@@ -49,6 +49,7 @@ class CdPlayer extends Phaser.Sprite{
 		this.id = info.id;
 		this.type = "player"; //currently add will be deleted in the future
 		this.attack = playerAttack;
+		this.weapon = 0;
 		this.boost = 1.0;
 
 		//properties
@@ -106,8 +107,12 @@ class CdPlayer extends Phaser.Sprite{
 	fire() {
 		if (game.time.now > this.fireTime) {
 			this.fireTime = game.time.now + this.fireRate;
-			return true;
-		} else return false;
+			return this.weapon;
+		} else return -1;
+	}
+
+	changeWeapon() {
+		this.weapon = (this.weapon + 1) % flyingInfo.length;
 	}
 
 	speedBoost(p) {

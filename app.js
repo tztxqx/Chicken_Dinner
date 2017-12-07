@@ -80,7 +80,17 @@ GameObject.prototype = {
 			owner: this.owner,
 			attack: this.attack,
 		}
-	}
+	},
+	flyingInfo1: function() {
+		return {
+			x: this.x,
+			y: this.y,
+			id: this.id,
+			name: this.name,
+			owner: this.owner,
+			attack: this.attack,
+		}
+	},
 };
 
 // heartBeat checking
@@ -172,12 +182,20 @@ function pickUp(playerId, pickupId) {
 
 function newFire(playerId, data) {
 	var uniqueId = unique.v4();
-	var flying = new GameObject(data.x, data.y, uniqueId, 0);
-	flying.rotation = data.rotation;
-	flying.attack = data.attack;
-	flying.owner = playerId;
-	flyingList.push(flying);
-	io.emit('new_flying', flying.flyingInfo());
+	if (data.fireName == 0) {
+		let flying = new GameObject(data.x, data.y, uniqueId, 0);
+		flying.rotation = data.rotation;
+		flying.attack = data.attack;
+		flying.owner = playerId;
+		flyingList.push(flying);
+		io.emit('new_flying', flying.flyingInfo());
+	} else {
+		let flying = new GameObject(data.worldX, data.worldY, uniqueId, 1);
+		flying.attack = data.attack;
+		flying.owner = playerId;
+		flyingList.push(flying);
+		io.emit('new_flying', flying.flyingInfo1());
+	}
 }
 
 function onPlayerStateChanged(data){
@@ -199,6 +217,7 @@ function onPlayerStateChanged(data){
 	}
 	if (data.fire) {
 		newFire(this.id, data);
+		//console.log(data);
 	}
 }
 

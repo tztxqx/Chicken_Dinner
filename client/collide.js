@@ -5,7 +5,7 @@ function player_coll (body, shapeA, shapeB, equation) {
 	var bodyId = gameObject.id;
 	//the type of the body the player made contact with 
 	var type = gameObject.type;
-	console.log("collision", type, bodyId);
+	console.log("collision", type);
 	//console.log("collision player", bodyId, type);
 
 	if (type === "player") {
