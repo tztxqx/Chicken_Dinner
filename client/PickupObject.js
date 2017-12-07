@@ -60,12 +60,11 @@ function onItemUpdate (data) {
 function onPlayerPickup (data) {
 	var player = findplayerbyid(data.playerId);
 	var pickup = finditembyid(data.pickupId);
-	if (data.playerId === playerDude.id) {
-		player = playerDude;
+	if (data.playerId === playerDude.id && pickup) {
+		playerDude.pickUp(pickup);
 	}
 	if (!player || !pickup)
 		return;
-	player.pickUp(pickup);
 	pickupObjectList.splice(pickupObjectList.indexOf(pickup), 1); 
 	//destroy the phaser object
 	pickup.destroy(true,false);	

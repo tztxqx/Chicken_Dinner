@@ -85,7 +85,7 @@ gameState.prototype = {
 		socket.on('remove_player', onRemovePlayer);
 		socket.on('player_pickup', onPlayerPickup);
 		// get hurt
-		socket.on("player_hp_change", onPlayerHurt);
+		socket.on("player_hp_change", onPlayerHpChange);
 		socket.on("player_hit", onPlayerHit);
 		// get element
 		socket.on("new_pickup", onItemUpdate);

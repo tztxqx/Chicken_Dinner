@@ -170,6 +170,14 @@ function onHit(data) {
 	io.emit("player_hit", {playerId: this.id, flyingId: data.id});
 }
 
+function onHpGet(data) {
+	var currentPlayer = findPlayerId(this.id);
+	if (!currentPlayer)
+		return;
+	data.id = this.id;
+	io.emit("player_hp_change", data);
+}
+
 function pickUp(playerId, pickupId) {
 	var player = findPlayerId(playerId);
 	var pickup = findPickupId(pickupId);
@@ -233,4 +241,5 @@ io.sockets.on('connection', function(socket){
 	socket.on("my_player", onNewplayer);
 	socket.on("input_control", onPlayerStateChanged);
 	socket.on("player_hit", onHit);
+	socket.on("hp_get", onHpGet);
 });

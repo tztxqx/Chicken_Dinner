@@ -63,7 +63,7 @@ class Fireball extends FlyingObject {
 	}
 
 	hitPlayer(player) {
-		player.hpChange(-this.attack);
+		player.hpStatusChange(-this.attack);
 		return true;
 	}
 }
@@ -81,7 +81,8 @@ class Trap extends FlyingObject {
 	}
 
 	hitPlayer(player) {
-		player.hpChange(-this.attack);
+		player.hpStatusChange(-this.attack);
+		return false;
 	}
 }
 
@@ -120,11 +121,9 @@ function onNewFlying (data) {
 function onPlayerHit (data) {
 	var player = findplayerbyid(data.playerId);
 	var flying = findflyingbyid(data.flyingId);
-	if (data.playerId === playerDude.id) {
-		player = playerDude;
-	}
 	if (!player || !flying)
 		return;
+	//console.log(player, flying);
 	if (flying.hitPlayer(player)) {
 		flying.kill();
 	}
