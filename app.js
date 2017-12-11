@@ -218,6 +218,7 @@ function onPlayerStateChanged(data){
 		y : data.y,
 		rotation: data.rotation,
 	};
+	//console.log(data.rotation);
 	//console.log("where is enemy", currentData);
 	this.broadcast.emit('enemy_state_change', currentData);
 	if (data.pickId) {

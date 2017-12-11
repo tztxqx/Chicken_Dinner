@@ -4,10 +4,11 @@ function movetoPointer (player_dude, speed, pointer, rotation, maxTime) {
 	//console.log(displayObject);
 	var angle = angleToPointer(displayObject, pointer);
 
-	var d_rotation = displayObject.rotation - rotation;
-
+	var d_rotation = displayObject.rotationBody.rotation - rotation;
+	console.log(d_rotation);
 	var d_rotation_final;
 
+	//caculate for rotation from -PI to PI
 	if(d_rotation > Math.PI){
 		d_rotation_final = d_rotation - 2 * Math. PI;
 	}
@@ -18,24 +19,22 @@ function movetoPointer (player_dude, speed, pointer, rotation, maxTime) {
 		d_rotation_final = d_rotation;
 	}
 
+	//because arcade require degrees!!!
+	d_rotation_final_degree = d_rotation_final/Math.PI * 180;
 	if (maxTime > 0)
 	{
 		speed = distanceToPointer(displayObject, pointer) / (maxTime / 1000);
-		angular_speed =  - (d_rotation_final) / (maxTime/1000); 
+		angular_speed = -(d_rotation_final_degree) / (maxTime/1000); 
 	}
 
 	displayObject.body.velocity.x = speed * Math.cos(angle);
 	displayObject.body.velocity.y = speed * Math.sin(angle);
 
-	// smooth player to pointer
-	displayObject.body.angularVelocity = angular_speed;
+	//angular_speed 
+	displayObject.rotationBody.body.angularVelocity = angular_speed;
 	player_dude.setHealthBar();
 
-	player_dude.player_name_show.x = player_dude.body.x;
-	player_dude.player_name_show.y = player_dude.body.y - player_name_show_realtive;
-
 	return angle;
-
 }
 
 

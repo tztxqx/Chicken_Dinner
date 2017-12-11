@@ -36,11 +36,11 @@ var earthImprove = 10;
 
 // **************
 
+
 //for CdPlayer info will be {x, y, id, name}
 class CdPlayer extends Phaser.Sprite{
 	constructor(info) {
-		super(cdplayerGame, info.x, info.y, 
-		cdplayer_image);  // info.image || for default
+		super(cdplayerGame, info.x, info.y);  // info.image || for default
 		
 		//add to game
 		cdplayerGame.add.existing(this);
@@ -52,19 +52,41 @@ class CdPlayer extends Phaser.Sprite{
 
 		//name and name show
 		this.name = info.name;
-		this.player_name_show = cdplayerGame.add.text(this.x, this.y, this.name);
+		//this.player_name_show = cdplayerGame.add.text(this.x, this.y, this.name);
 
 		//health and health bar
 		this.health = maxHealth; //same as orial life value initial_health (maxHealth default = 100 in Sprite.maxHealth)
 		this.maxHealth = maxHealth;
 		this.health_bar = new HealthBar(cdplayerGame, {width: 100, height: 10, 
 			wdwx: this.x, y: this.y - health_bar_relative_height});
-		this.health_bar.setPercent(100);
+
+		//rotation Body for rating
+		this.rotationBody = this.addChild(new Phaser.Sprite(cdplayerGame, 0, 0, cdplayer_image));
+		console.log(this.children);
+		console.log(this.rotationBody.anchor);
+		//set to the center of the rotation
+		this.rotationBody.anchor.x = 0.5;
+		this.rotationBody.anchor.y = 0.5;
+		//enable physics for angular velocity
+		cdplayerGame.physics.arcade.enable(this.rotationBody);
+		this.bodyRotation = this.rotationBody.rotation;
 		
+		//player_name_show add child
+		this.player_name_show = this.addChild(cdplayerGame.add.text(0, -50, this.name));
+		this.health_bar.setPercent(100);
+
 		//physics enable
 		cdplayerGame.physics.p2.enableBody(this);
 		this.body.setCircle(body_size);
+		//fixed the body rotation
+		this.body.fixedRotation = true;
 		this.body.controller = this;
+	}
+	
+	//only used for set rotation
+	setRotation(angle) {
+		this.rotationBody.rotation = angle;
+		this.bodyRotation = angle;
 	}
 
 	setHealthBar() {

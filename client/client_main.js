@@ -141,12 +141,13 @@ gameState.prototype = {
 			playerDude.body.velocity.y = speed.y;
 
 			var pointer = game.input.mousePointer;
-			playerDude.body.rotation = angleToPointer(playerDude, pointer);
+			playerDude.setRotation(angleToPointer(playerDude, pointer));
+			//console.log(angleToPointer(playerDude, pointer));
 			//console.log("emitting");
 			var inputSet = {
 				x: playerDude.body.x,
 				y: playerDude.body.y,
-				rotation : playerDude.body.rotation,
+				rotation : playerDude.bodyRotation,
 			};
 			if (key.f && playerDude.readyToPick) {
 				inputSet.pickId = playerDude.readyToPick.id;
@@ -171,8 +172,8 @@ gameState.prototype = {
 			socket.emit('input_control', inputSet);
 
 			// player name show
-			playerDude.player_name_show.x = playerDude.body.x;
-			playerDude.player_name_show.y = playerDude.body.y - player_name_show_realtive;
+			//playerDude.player_name_show.x = playerDude.body.x;
+			//playerDude.player_name_show.y = playerDude.body.y - player_name_show_realtive;
 
 			playerDude.setHealthBar();
 			// Change life value can change the value in the health bar
