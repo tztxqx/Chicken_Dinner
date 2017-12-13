@@ -123,7 +123,7 @@ function findflyingbyid(id) {
 // function called when new food is added in the server.
 function onNewFlying (data) {
 	var factory = flyingInfo[data.name].factory;
-	console.log(data);
+	//console.log(data);
 	flyingObjectList.push(new factory(data));
 }
 

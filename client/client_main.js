@@ -136,6 +136,9 @@ gameState.prototype = {
 		if (countFrame % 2 != 0) {
 			return;
 		}
+		if (!playerDude || !playerDude.alive) {
+			return;
+		}
 		if (gameProperties.in_game) {
 
 			//keyboardInput = game.input.keyboard.createCursorKeys();

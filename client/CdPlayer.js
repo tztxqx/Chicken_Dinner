@@ -111,7 +111,10 @@ class CdPlayer extends Phaser.Sprite{
 	destroy(){
 		this.health_bar.kill();
 		this.player_name_show.destroy();
-		enemies.splice(enemies.indexOf(this), 1);
+		var index = enemies.indexOf(this);
+		if (index != -1) {
+			enemies.splice(enemies.indexOf(this), 1);
+		}
 		super.destroy();
 	}
 }
@@ -126,6 +129,7 @@ class PlayerDude extends CdPlayer {
 
 		// socket id
 		this.attack = playerAttack;
+		this.alive = true;
 		this.weapon = 0;
 		this.boost = 1.0;
 
@@ -174,6 +178,13 @@ class PlayerDude extends CdPlayer {
 		} else return -1;
 	}
 
+	hpStatusChange(delta, deltaMax) {
+		super.hpStatusChange(delta, deltaMax);
+		if (this.health == 0) {
+			socket.emit("kill");
+		}
+	}
+
 	changeWeapon(op) {
 		if (op === 1) {
 			this.weapon = (this.weapon + flyingInfo.length - 1) % flyingInfo.length;
@@ -192,6 +203,11 @@ class PlayerDude extends CdPlayer {
 			x: p.x * bst,
 			y: p.y * bst,
 		}
+	}
+
+	destroy() {
+		super.destroy();
+		this.alive = false;
 	}
 }
 

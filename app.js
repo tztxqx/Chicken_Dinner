@@ -192,7 +192,7 @@ function removePlayer() {
 	}
 	console.log("removing player " + this.id);
 	//send message to every connected client except the sender
-	this.broadcast.emit('remove_player', {id: this.id});
+	io.emit('remove_player', {id: this.id});
 }
 
 function onHit(data) {
