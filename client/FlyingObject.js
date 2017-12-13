@@ -102,6 +102,14 @@ var flyingInfo = [{
 	cd: 2000,
 	lifespan: 200,
 	factory: Trap,
+}, {
+	name: 'tornado',
+	speed: 500,
+	size: 30,
+	attack: 1.5,
+	cd: 1000,
+	lifespan: 2000,
+	factory: Fireball,
 }];
 
 // search through food list to find the food object

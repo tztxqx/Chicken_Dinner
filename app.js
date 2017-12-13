@@ -43,6 +43,10 @@ var findPlayerId = findById(playerList);
 var findPickupId = findById(pickupList);
 var findFlyingId = findById(flyingList);
 
+function inList(a, b) {
+	return (b.indexOf(a) != -1) ? true : false;
+}
+
 //game object class in the server
 class GameObject {
 	constructor(startX, startY, id, name) {
@@ -95,8 +99,7 @@ class Flying extends GameObject {
 		super(info.x, info.y, info.id, info.name);
 		this.owner = info.owner;
 		this.attack = info.attack;
-		this.type = info.type;
-		if (this.type === 0) {
+		if (inList(this.name, [0, 2])) {
 			this.rotation = info.rotation;
 		}
 	}
@@ -110,7 +113,7 @@ class Flying extends GameObject {
 			owner: this.owner,
 			attack: this.attack,
 		};
-		if (this.type === 0) {
+		if (inList(this.name, [0, 2])) {
 			info.rotation = this.rotation;
 		}
 		return info;
@@ -221,26 +224,24 @@ function pickUp(playerId, pickupId) {
 
 function newFire(playerId, data) {
 	var uniqueId = unique.v4();
-	if (data.fireName == 0) {
+	if (inList(data.fireName, [0, 2])) {
 		var flying = new Flying({
 			x: data.x,
 			y: data.y,
 			id: uniqueId,
-			name: 0,
+			name: data.fireName,
 			rotation: data.rotation,
 			attack: data.attack,
 			owner: playerId,
-			type: 0,
 		});
 	} else {
 		var flying = new Flying({
 			x: data.worldX,
 			y: data.worldY,
 			id: uniqueId,
-			name: 1,
+			name: data.fireName,
 			attack: data.attack,
 			owner: data.owner,
-			type: 1,
 		});
 	}
 	flyingList.push(flying);

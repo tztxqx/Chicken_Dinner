@@ -174,8 +174,12 @@ class PlayerDude extends CdPlayer {
 		} else return -1;
 	}
 
-	changeWeapon() {
-		this.weapon = (this.weapon + 1) % flyingInfo.length;
+	changeWeapon(op) {
+		if (op === 1) {
+			this.weapon = (this.weapon + flyingInfo.length - 1) % flyingInfo.length;
+		} else {
+			this.weapon = (this.weapon + 1) % flyingInfo.length;
+		}
 	}
 
 	speedBoost(p) {

@@ -58,6 +58,7 @@ gameState.prototype = {
 		game.load.spritesheet(numToElement[4],'/client/image/earth_image.png');
 		game.load.spritesheet(flyingInfo[0].name,'/client/image/fire_image.png');
 		game.load.spritesheet(flyingInfo[1].name,'/client/image/thunder_image.png');
+		game.load.spritesheet(flyingInfo[2].name,'/client/image/wind_image.png');
     },
 
 	create: function () {
@@ -91,6 +92,12 @@ gameState.prototype = {
 		socket.on("new_pickup", onItemUpdate);
 		socket.on("new_flying", onNewFlying);
 		this.keyQ = game.input.keyboard.addKey(Phaser.Keyboard.Q);
+		this.keyQ.onDown.add(function(){
+			if (playerDude) {
+				playerDude.changeWeapon();
+			}
+		}, this);
+		game.input.keyboard.removeKeyCapture(Phaser.Keyboard.Q);
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
@@ -101,7 +108,7 @@ gameState.prototype = {
 	},
 
 	processKey: function() {
-		var key = {x: 0, y: 0, f: 0, shift: 0, fire: -1, q: 0};
+		var key = {x: 0, y: 0, f: 0, shift: 0, fire: -1};
 		if (this.keyW.isDown) {
 			key.y = -1;
 		} else if (this.keyS.isDown) {
@@ -114,9 +121,6 @@ gameState.prototype = {
 		}
 		if (this.keyF.isDown) {
 			key.f = 1;
-		}
-		if (this.keyQ.isDown) {
-			key.q = 1;
 		}
 		if (this.keyShift.isDown) {
 			key.shift = 1;
@@ -152,20 +156,13 @@ gameState.prototype = {
 			if (key.f && playerDude.readyToPick) {
 				inputSet.pickId = playerDude.readyToPick.id;
 			}
-			if (key.q) {
-				playerDude.changeWeapon();
-			}
 			if (key.fire != -1) {
-				if (key.fire == 0) {
-					inputSet.fire = 1;
-					inputSet.fireName = 0;
-					inputSet.attack = playerDude.attack;
-				} else {
-					inputSet.fire = 1;
-					inputSet.fireName = 1;
+				inputSet.fire = 1;
+				inputSet.fireName = key.fire;
+				inputSet.attack = playerDude.attack;
+				if (key.fire === 1) {
 					inputSet.worldX = pointer.worldX;
 					inputSet.worldY = pointer.worldY;
-					inputSet.attack = playerDude.attack;
 				}
 			}
 
