@@ -5,7 +5,7 @@ function movetoPointer (player_dude, speed, pointer, rotation, maxTime) {
 	var angle = angleToPointer(displayObject, pointer);
 
 	var d_rotation = displayObject.rotationBody.rotation - rotation;
-	console.log(d_rotation);
+	//console.log(d_rotation);
 	var d_rotation_final;
 
 	//caculate for rotation from -PI to PI

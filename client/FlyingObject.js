@@ -91,6 +91,7 @@ var flyingInfo = [{
 	speed: 1200,
 	size: 10,
 	attack: 1,
+	cd: 500,
 	lifespan: 1000,
 	factory: Fireball,
 }, {
@@ -98,6 +99,7 @@ var flyingInfo = [{
 	size: 30,
 	attack: 0.8,
 	affects: true,
+	cd: 2000,
 	lifespan: 200,
 	factory: Trap,
 }];
@@ -113,7 +115,7 @@ function findflyingbyid(id) {
 // function called when new food is added in the server.
 function onNewFlying (data) {
 	var factory = flyingInfo[data.name].factory;
-	//console.log(data);
+	console.log(data);
 	flyingObjectList.push(new factory(data));
 }
 

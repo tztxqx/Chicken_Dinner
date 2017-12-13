@@ -132,8 +132,7 @@ class PlayerDude extends CdPlayer {
 		//properties
 		this.pickupList = [];
 		this.body.collideWorldBounds = true;
-		this.fireRate = 200;
-		this.fireTime = 0;
+		this.fireTimeList = Array(flyingInfo.length).fill(0);
 		this.readyToPick = null;
 
 		this.body.onBeginContact.add(player_coll);
@@ -168,9 +167,10 @@ class PlayerDude extends CdPlayer {
 	}
 
 	fire() {
-		if (cdplayerGame.time.now > this.fireTime) {
-			this.fireTime = cdplayerGame.time.now + this.fireRate;
-			return this.weapon;
+		var type = this.weapon;
+		if (cdplayerGame.time.now > this.fireTimeList[type]) {
+			this.fireTimeList[type] = cdplayerGame.time.now + flyingInfo[type].cd;
+			return type;
 		} else return -1;
 	}
 

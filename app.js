@@ -44,15 +44,26 @@ var findPickupId = findById(pickupList);
 var findFlyingId = findById(flyingList);
 
 //game object class in the server
-var GameObject = function(startX, startY, id, name) {
-	this.x = startX;
-	this.y = startY;
-	this.id = id;
-	this.name = name;
+class GameObject {
+	constructor(startX, startY, id, name) {
+		this.x = startX;
+		this.y = startY;
+		this.id = id;
+		this.name = name;
+	}
+
+	Info() {
+	}
 }
 
-GameObject.prototype = {
-	playerInfo: function() {
+class Player extends GameObject {
+	constructor(info) {
+		super(info.x, info.y, info.id, info.name);
+		this.health = info.health;
+		this.maxHealth = info.maxHealth;
+	}
+
+	Info() {
 		return {
 			x: this.x,
 			y: this.y,
@@ -60,38 +71,51 @@ GameObject.prototype = {
 			name: this.name,
 			health: this.health,
 			maxHealth: this.maxHealth,
-		}
-	},
-	pickupInfo: function() {
+		};
+	}
+}
+
+class Pickup extends GameObject {
+	constructor(info) {
+		super(info.x, info.y, info.id, info.name);
+	}
+
+	Info() {
 		return {
 			x: this.x,
 			y: this.y,
 			id: this.id,
 			name: this.name,
+		};
+	}
+}
+
+class Flying extends GameObject {
+	constructor(info) {
+		super(info.x, info.y, info.id, info.name);
+		this.owner = info.owner;
+		this.attack = info.attack;
+		this.type = info.type;
+		if (this.type === 0) {
+			this.rotation = info.rotation;
 		}
-	},
-	flyingInfo: function() {
-		return {
+	}
+
+	Info() {
+		let info = {
 			x: this.x,
 			y: this.y,
 			id: this.id,
 			name: this.name,
-			rotation: this.rotation,
 			owner: this.owner,
 			attack: this.attack,
+		};
+		if (this.type === 0) {
+			info.rotation = this.rotation;
 		}
-	},
-	flyingInfo1: function() {
-		return {
-			x: this.x,
-			y: this.y,
-			id: this.id,
-			name: this.name,
-			owner: this.owner,
-			attack: this.attack,
-		}
-	},
-};
+		return info;
+	}
+}
 
 // heartBeat checking
 setInterval(heartBeat, 1000/60);
@@ -112,10 +136,10 @@ function addElement(n) {
 		//create the unique id using node-uuid
 		let uniqueId = unique.v4();
 		let {x, y} = randomGenerate(gameSettings.width, gameSettings.height);
-		let element = new GameObject(x, y, uniqueId, randomInt(0, 4));
+		let element = new Pickup({x: x, y: y, id: uniqueId, name: randomInt(0, 4)});
 		pickupList.push(element);
 		//set the food data back to client
-		io.emit("new_pickup", element.pickupInfo());
+		io.emit("new_pickup", element.Info());
 	}
 }
 
@@ -132,22 +156,29 @@ function randomInt (low, high) {
 function onNewplayer (data) {
 	//new player instance
 	var {x, y} = randomGenerate(gameSettings.low, gameSettings.high);
-	var newPlayer = new GameObject(x, y, this.id, data.name);
+	var newPlayer = new Player({
+		x: x,
+		y: y,
+		id: this.id,
+		name: data.name,
+		health: 100,
+		maxHealth: 100,
+	});
 	console.log("created new player with id " + this.id);
 
 	//send to the new player about everyone who is already connected.
 	var that = this;
 	playerList.forEach(function(player) {
-		that.emit("new_enemy", player.playerInfo());
+		that.emit("new_enemy", player.Info());
 	});
 	pickupList.forEach(function(pickup) {
-		that.emit("new_pickup", pickup);
+		that.emit("new_pickup", pickup.Info());
 	});
 	//send message to every connected client except the sender
-	this.broadcast.emit('new_enemy', newPlayer.playerInfo());
+	this.broadcast.emit('new_enemy', newPlayer.Info());
 
 	playerList.push(newPlayer);
-	this.emit("create_player", newPlayer.playerInfo());
+	this.emit("create_player", newPlayer.Info());
 }
 
 function removePlayer() {
@@ -191,19 +222,29 @@ function pickUp(playerId, pickupId) {
 function newFire(playerId, data) {
 	var uniqueId = unique.v4();
 	if (data.fireName == 0) {
-		let flying = new GameObject(data.x, data.y, uniqueId, 0);
-		flying.rotation = data.rotation;
-		flying.attack = data.attack;
-		flying.owner = playerId;
-		flyingList.push(flying);
-		io.emit('new_flying', flying.flyingInfo());
+		var flying = new Flying({
+			x: data.x,
+			y: data.y,
+			id: uniqueId,
+			name: 0,
+			rotation: data.rotation,
+			attack: data.attack,
+			owner: playerId,
+			type: 0,
+		});
 	} else {
-		let flying = new GameObject(data.worldX, data.worldY, uniqueId, 1);
-		flying.attack = data.attack;
-		flying.owner = playerId;
-		flyingList.push(flying);
-		io.emit('new_flying', flying.flyingInfo1());
+		var flying = new Flying({
+			x: data.worldX,
+			y: data.worldY,
+			id: uniqueId,
+			name: 1,
+			attack: data.attack,
+			owner: data.owner,
+			type: 1,
+		});
 	}
+	flyingList.push(flying);
+	io.emit('new_flying', flying.Info());
 }
 
 function onPlayerStateChanged(data){
