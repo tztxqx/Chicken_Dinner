@@ -49,7 +49,7 @@ gameState.prototype = {
 		game.physics.p2.gravity.y = 0;
 		game.physics.p2.applyGravity = false;
 		//game.physics.p2.enableBody(game.physics.p2.walls);
-		game.load.image('ground', '/client/image/platform.png');
+		game.load.image('ground', '/client/image/map.jpg', 736, 736);
 		game.load.spritesheet('dudesheet', '/client/image/dudesheet.png', 79, 66);
 		game.load.spritesheet(numToElement[0],'/client/image/water_image.png');
 		game.load.spritesheet(numToElement[1],'/client/image/fire_image.png');
@@ -70,7 +70,7 @@ gameState.prototype = {
 
 		mapWalls.enableBody = true;
 		var ground = mapWalls.create(0, 0, 'ground');
-		ground.scale.setTo(3, 5);
+		ground.scale.setTo(4000/736, 4000/736);
 		console.log("client started");
 
 		//ask for my player
