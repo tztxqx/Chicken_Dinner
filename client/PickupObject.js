@@ -33,7 +33,10 @@ class PickupObject extends Phaser.Sprite{
 		// can not be push away
 		this.body.data.shapes[0].sensor = true;
 
+		this.hint = "Press F to pick";
 	}
+
+
 }
 
 
