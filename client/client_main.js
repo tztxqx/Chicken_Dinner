@@ -59,6 +59,7 @@ gameState.prototype = {
 		game.load.spritesheet(flyingInfo[0].name,'/client/image/fire_image.png');
 		game.load.spritesheet(flyingInfo[1].name,'/client/image/thunder_image.png');
 		game.load.spritesheet(flyingInfo[2].name,'/client/image/wind_image.png');
+		game.load.spritesheet(flyingInfo[3].name,'/client/image/water_image.png');
     },
 
 	create: function () {
@@ -85,12 +86,14 @@ gameState.prototype = {
 		// when received remove_player, remove the player passed;
 		socket.on('remove_player', onRemovePlayer);
 		socket.on('player_pickup', onPlayerPickup);
-		// get hurt
+		// player event
 		socket.on("player_hp_change", onPlayerHpChange);
+		socket.on("player_buff", onPlayerBuff);
 		socket.on("player_hit", onPlayerHit);
 		// get element
 		socket.on("new_pickup", onItemUpdate);
 		socket.on("new_flying", onNewFlying);
+		socket.on("player_use_skill", onUsingSkill);
 		this.keyQ = game.input.keyboard.addKey(Phaser.Keyboard.Q);
 		this.keyQ.onDown.add(function(){
 			if (playerDude) {
@@ -175,6 +178,10 @@ gameState.prototype = {
 				if (key.fire === 1) {
 					inputSet.worldX = pointer.worldX;
 					inputSet.worldY = pointer.worldY;
+				}
+				if (key.fire === 3) {
+					inputSet.worldX = inputSet.x;
+					inputSet.worldY = inputSet.y;
 				}
 			}
 

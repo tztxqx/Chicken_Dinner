@@ -28,6 +28,8 @@ var speed_two_direction = 0.8;
 
 var playerAttack = 10;
 var maxHealth = 100;
+var maxSkills = 3;
+
 var waterRecover = 30;
 var fireAttack = 1;
 var thunderUp = 20;
@@ -109,6 +111,16 @@ class CdPlayer extends Phaser.Sprite{
 		this.setHealthBar();
 	}
 
+	setBuff(data) {
+		if (data.visible !== undefined){
+			if (data.visible === false) {
+				this.visible = false;
+			} else {
+				this.visible = true;
+			}
+		}
+	}
+
 	//also destroy health bar and name_show
 	destroy(){
 		this.health_bar.kill();
@@ -136,6 +148,7 @@ class PlayerDude extends CdPlayer {
 		this.boost = 1.0;
 
 		//properties
+		this.skillList = [];
 		this.pickupList = [];
 		this.body.collideWorldBounds = true;
 		this.fireTimeList = Array(flyingInfo.length).fill(0);
@@ -146,18 +159,49 @@ class PlayerDude extends CdPlayer {
 		cdplayerGame.camera.follow(this, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
 	}
 
+	addSkill(type) {
+		if (this.skillList.length >= maxSkills)
+			return;
+		if (this.skillList.indexOf(type) === -1) {
+			this.skillList.push(type);
+		}
+	}
+
+	useSkill(type) {
+		if (type === 4) {
+			socket.emit("player_buff", {"visible": false});
+			let that = this;
+			setTimeout(function(){
+				socket.emit("player_buff", {"visible": true});
+			}, flyingInfo[type].lifespan);
+		}
+	}
+
 	upgrade() {
 		var result = this.pickupList.map(x => Number(x.name)).sort();
 		var that = this;
-		if (result[0] == result[1] || result[1] == result[2]) {
-			if (result[1] == 0)
+		if (result[0] === result[1] && result[1] === result[2]) {
+			if (result[0] === 0) {
+				this.addSkill(3);
+			} else if (result[0] === 1) {
+				this.addSkill(0);
+			} else if (result[0] === 2) {
+				this.addSkill(1);
+			} else if (result[0] === 3) {
+				this.addSkill(2);
+			} else if (result[0] === 4) {
+				this.addSkill(4);
+			}
+		} else
+		if (result[0] === result[1] || result[1] === result[2]) {
+			if (result[1] === 0)
 				socket.emit("hp_get", {delta: waterRecover, deltaMax: 0});
-			else if (result[1] == 1) {
-			} else if (result[1] == 2) {
+			else if (result[1] === 1) {
+			} else if (result[1] === 2) {
 				this.attack += thunderUp;
-			} else if (result[1] == 3) {
+			} else if (result[1] === 3) {
 				this.boost += windBoost;
-			} else if (result[1] == 4) {
+			} else if (result[1] === 4) {
 				socket.emit("hp_get", {delta: earthImprove, deltaMax: earthImprove});
 			}
 		}
@@ -173,7 +217,7 @@ class PlayerDude extends CdPlayer {
 	}
 
 	fire() {
-		var type = this.weapon;
+		var type = this.skillList[this.weapon];
 		if (cdplayerGame.time.now > this.fireTimeList[type]) {
 			this.fireTimeList[type] = cdplayerGame.time.now + flyingInfo[type].cd;
 			return type;
@@ -189,9 +233,9 @@ class PlayerDude extends CdPlayer {
 
 	changeWeapon(op) {
 		if (op === 1) {
-			this.weapon = (this.weapon + flyingInfo.length - 1) % flyingInfo.length;
+			this.weapon = (this.weapon + this.skillList.length - 1) % this.skillList.length;
 		} else {
-			this.weapon = (this.weapon + 1) % flyingInfo.length;
+			this.weapon = (this.weapon + 1) % this.skillList.length;
 		}
 	}
 
@@ -295,11 +339,25 @@ function onEnemyStateChange (data) {
 	//movePlayer.body.rotation = data.rotation;
 }
 
+function onPlayerBuff(data) {
+	//console.log("player_buff");
+	var player = findplayerbyid(data.playerId);
+	if (!player) {
+		return;
+	}
+	player.setBuff(data);
+}
+
 function onPlayerHpChange (data) {
 	var player = findplayerbyid(data.id);
 	if (!player) {
 		return;
 	}
-	console.log(data);
+	//console.log(data);
 	player.hpStatusChange(data.delta, data.deltaMax);
+}
+
+function onUsingSkill(data) {
+	//console.log("player_skill");
+	playerDude.useSkill(data.skillId);
 }

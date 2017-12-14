@@ -77,6 +77,7 @@ class Trap extends FlyingObject {
 	}
 
 	affect(player) {
+		console.log(this.owner, player.id, this.affects);
 		return (this.owner !== player.id) === this.affects;
 	}
 
@@ -110,6 +111,19 @@ var flyingInfo = [{
 	cd: 1000,
 	lifespan: 2000,
 	factory: Fireball,
+}, {
+	name: 'spring',
+	size: 30,
+	attack: -1,
+	affects: false,
+	cd: 5000,
+	lifespan: 200,
+	factory: Trap,
+}, {
+	name: 'hide',
+	cd: 10000,
+	lifespan: 2000,
+	factory: null,
 }];
 
 // search through food list to find the food object
@@ -123,6 +137,8 @@ function findflyingbyid(id) {
 // function called when new food is added in the server.
 function onNewFlying (data) {
 	var factory = flyingInfo[data.name].factory;
+	if (factory === null)
+		return;
 	//console.log(data);
 	flyingObjectList.push(new factory(data));
 }

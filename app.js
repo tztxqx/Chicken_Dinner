@@ -43,8 +43,8 @@ var findPlayerId = findById(playerList);
 var findPickupId = findById(pickupList);
 var findFlyingId = findById(flyingList);
 
-function inList(a, b) {
-	return (b.indexOf(a) != -1) ? true : false;
+function inList(element, list) {
+	return (list.indexOf(element) != -1) ? true : false;
 }
 
 //game object class in the server
@@ -196,6 +196,15 @@ function removePlayer() {
 	io.emit('remove_player', {id: this.id});
 }
 
+function onPlayerBuff(data) {
+	var currentPlayer = findPlayerId(this.id);
+	if (!currentPlayer) {
+		return;
+	}
+	data.playerId = this.id;
+	this.broadcast.emit('player_buff', data);
+}
+
 function onHit(data) {
 	var movePlayer = findPlayerId(this.id);
 	var flying = findFlyingId(data.id);
@@ -242,11 +251,18 @@ function newFire(playerId, data) {
 			id: uniqueId,
 			name: data.fireName,
 			attack: data.attack,
-			owner: data.owner,
+			owner: playerId,
 		});
 	}
 	flyingList.push(flying);
 	io.emit('new_flying', flying.Info());
+}
+
+function useSkill(socket, data) {
+	var currentPlayer = findPlayerId(socket.id);
+	if (!currentPlayer)
+		return;
+	socket.emit("player_use_skill", {skillId: data.fireName});
 }
 
 function onPlayerStateChanged(data){
@@ -268,7 +284,12 @@ function onPlayerStateChanged(data){
 		pickUp(this.id, data.pickId);
 	}
 	if (data.fire) {
-		newFire(this.id, data);
+		//console.log(data.fireName);
+		if (inList(data.fireName, [0, 1, 2, 3])) {
+			newFire(this.id, data);
+		} else {
+			useSkill(this, data);
+		}
 		//console.log(data);
 	}
 }
@@ -284,6 +305,7 @@ io.sockets.on('connection', function(socket){
 	// listen for new player
 	socket.on("my_player", onNewplayer);
 	socket.on("input_control", onPlayerStateChanged);
+	socket.on("player_buff", onPlayerBuff);
 	socket.on("player_hit", onHit);
 	socket.on("hp_get", onHpGet);
 });
