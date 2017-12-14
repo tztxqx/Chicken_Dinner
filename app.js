@@ -181,6 +181,7 @@ function onNewplayer (data) {
 	this.broadcast.emit('new_enemy', newPlayer.Info());
 
 	playerList.push(newPlayer);
+	//console.log(playerList.length);
 	this.emit("create_player", newPlayer.Info());
 }
 

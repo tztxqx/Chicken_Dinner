@@ -11,7 +11,8 @@ var gameBootstrapper = {
 	init: function(gameContainerElementId){
 		game.state.add('signinState', signinState);
 		game.state.add('gameState', gameState);
-		game.state.start('signinState');
+		game.state.add('gameoverState',gameoverState);
+		game.state.start('gameoverState',true, false);
 	}
 };
 

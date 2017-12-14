@@ -62,8 +62,8 @@ class CdPlayer extends Phaser.Sprite{
 
 		//rotation Body for rating
 		this.rotationBody = this.addChild(new Phaser.Sprite(cdplayerGame, 0, 0, cdplayer_image));
-		console.log(this.children);
-		console.log(this.rotationBody.anchor);
+		//console.log(this.children);
+		//console.log(this.rotationBody.anchor);
 		//set to the center of the rotation
 		this.rotationBody.anchor.x = 0.5;
 		this.rotationBody.anchor.y = 0.5;
@@ -238,14 +238,24 @@ function onRemovePlayer(data){
 
 	//removePlayer.health_bar.destroy();
 	removePlayer.destroy();
+
+	if(playerDude === removePlayer){
+		gameProperties.in_game = false;
+		playerLayer.killAll();
+		flyingLayer.killAll();
+		pickupLayer.killAll();
+		enemies = new Array();
+		console.log(enemies);
+		game.state.start('gameoverState',true, true);
+	}
 }
 
 
 //create my own player
 function createMyPlayer(data){
-	console.log(socket.id);
+	//console.log(socket.id);
 	playerDude = new PlayerDude(data);
-	console.log(playerDude);
+	//console.log(playerDude);
 	gameProperties.in_game = true;
 
 	//camera follow
@@ -256,10 +266,16 @@ function createMyPlayer(data){
 //all the player class
 
 
-
 //Server told us enemy, create it in the client
 function onNewPlayer(data){
 	var new_enemy = new CdPlayer(data);
+	// //ridiculous but it did happen.
+	// for(var x of enemies){
+	// 	if(x.id === new_enemy.id){
+	// 		x.destroy();
+	// 	}
+	// }
+	console.log("new enemies");
 	enemies.push(new_enemy);
 }
 

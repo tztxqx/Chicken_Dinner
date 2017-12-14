@@ -7,6 +7,8 @@ var playerName;
 var inputName;
 signinState.prototype = {
 	preload:function(){
+		console.log("reload");
+		game.world.setBounds(0, 0, 1920, 916);
 		game.load.spritesheet('button', '/client/image/startbutton.png');
 	},
 
@@ -15,6 +17,7 @@ signinState.prototype = {
 		//start button
 		button = game.add.button(game.world.centerX - 420, 300, 
 			'button', this.actionOnClick, this);
+		//console.log("recreate");
 		//player's input field
 		game.add.plugin(PhaserInput.Plugin);
 		inputName = game.add.inputField(game.world.centerX - 350, 190,{
@@ -28,14 +31,12 @@ signinState.prototype = {
 			    borderRadius: 6,
 			    placeHolder: 'Your Name',
 			});
-		console.log(inputName);
-
 	},
 
 	actionOnClick: function(){
 		playerName = inputName.value || "unknown";
 		console.log(inputName.value);
-		this.game.state.start("gameState");
+		this.game.state.start("gameState", true, true);
 	},
 	update: function(){
 

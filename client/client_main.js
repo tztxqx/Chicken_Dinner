@@ -40,7 +40,7 @@ var playerLayer;
 
 gameState.prototype = {
 	preload: function() {
-		console.log("preload");
+		//console.log("preload");
 		game.stage.disableVisibilityChange = true;
 		game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 		game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight);
