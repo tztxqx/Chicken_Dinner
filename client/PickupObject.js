@@ -33,7 +33,21 @@ class PickupObject extends Phaser.Sprite{
 		// can not be push away
 		this.body.data.shapes[0].sensor = true;
 
+		// record how many collision
+		this.colTimes = 0;
 		this.hint = "Press F to pick";
+		this.hintText = game.add.text(info.x-30, info.y-30, this.hint,
+			{font: "15px Arial", fill: "#ffffff", align: "center" });
+		this.hintText.visible = false;
+	}
+
+	showPressf(){
+		if(this.colTimes > 0){
+			this.hintText.visible = true;
+		}
+		else{
+			this.hintText.visible = false;
+		}
 	}
 
 
