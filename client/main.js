@@ -12,7 +12,7 @@ var gameBootstrapper = {
 		game.state.add('signinState', signinState);
 		game.state.add('gameState', gameState);
 		game.state.add('gameoverState',gameoverState);
-		game.state.start('gameoverState',true, false);
+		game.state.start('signinState',true, false);
 	}
 };
 
