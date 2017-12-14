@@ -14,7 +14,7 @@ var cdplayerGame = game;
 //show related area  (will be changed to Dictionary)*************
 
 //cdplayer_image show
-var cdplayer_image = 'dude';
+var cdplayer_image = 'dudesheet';
 
 //body_size
 var body_size = 15;
@@ -78,6 +78,8 @@ class CdPlayer extends Phaser.Sprite{
 		//physics enable
 		cdplayerGame.physics.p2.enableBody(this);
 		this.body.setCircle(body_size);
+
+		this.rotationBody.animations.add('move',[0,1,2], 10, true);
 		//fixed the body rotation
 		this.body.fixedRotation = true;
 		this.body.controller = this;

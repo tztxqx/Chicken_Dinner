@@ -50,7 +50,7 @@ gameState.prototype = {
 		game.physics.p2.applyGravity = false;
 		//game.physics.p2.enableBody(game.physics.p2.walls);
 		game.load.image('ground', '/client/image/platform.png');
-		game.load.spritesheet('dude', '/client/image/dude.png', 32, 48);
+		game.load.spritesheet('dudesheet', '/client/image/dudesheet.png', 79, 66);
 		game.load.spritesheet(numToElement[0],'/client/image/water_image.png');
 		game.load.spritesheet(numToElement[1],'/client/image/fire_image.png');
 		game.load.spritesheet(numToElement[2],'/client/image/thunder_image.png');
@@ -146,6 +146,15 @@ gameState.prototype = {
 			var speed = playerDude.speedBoost(key);
 			playerDude.body.velocity.x = speed.x;
 			playerDude.body.velocity.y = speed.y;
+
+			if((speed.x != 0) || (speed.y !=0)){
+				playerDude.rotationBody.animations.play('move');
+			}
+			else{
+				playerDude.rotationBody.animations.stop();
+
+				playerDude.rotationBody.frame = 1;
+			}
 
 			var pointer = game.input.mousePointer;
 			playerDude.setRotation(angleToPointer(playerDude, pointer));

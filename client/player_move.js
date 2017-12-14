@@ -30,6 +30,14 @@ function movetoPointer (player_dude, speed, pointer, rotation, maxTime) {
 	displayObject.body.velocity.x = speed * Math.cos(angle);
 	displayObject.body.velocity.y = speed * Math.sin(angle);
 
+	if((speed> 0.3) || (speed < -0.3)){
+		displayObject.rotationBody.animations.play('move');
+	}
+	else{
+		displayObject.rotationBody.animations.stop();
+
+		displayObject.rotationBody.frame = 1;
+	}
 	//angular_speed 
 	displayObject.rotationBody.body.angularVelocity = angular_speed;
 	player_dude.setHealthBar();
