@@ -11,6 +11,8 @@ function player_coll (body, shapeA, shapeB, equation) {
 	if (type === "player") {
 	} else if (type === "pickup") {
 		playerDude.readyToPick = gameObject;
+		gameObject.colTimes += 1;
+		gameObject.showPressf();
 	} else if (type === "flying") {
 		if (gameObject.affect(playerDude)) {
 			socket.emit("player_hit", {id: bodyId});
@@ -32,6 +34,8 @@ function player_leave (body, shapeA, shapeB, equation) {
 	} else if (type === "pickup") {
 		if (playerDude.readyToPick === gameObject)
 			playerDude.readyToPick = null;
+		gameObject.colTimes -= 1;
+		gameObject.showPressf();
 	} else if (type === 'flying') {
 	}
 }
