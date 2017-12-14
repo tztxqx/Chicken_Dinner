@@ -50,6 +50,10 @@ gameState.prototype = {
 		game.physics.p2.applyGravity = false;
 		//game.physics.p2.enableBody(game.physics.p2.walls);
 		game.load.image('ground', '/client/image/map.jpg', 736, 736);
+		game.load.image('skill1', '/client/image/skill1.png');
+		game.load.image('skill2', '/client/image/skill2.png');
+		game.load.image('skill3', '/client/image/skill3.png');
+		game.load.image('skillbound', '/client/image/skillbound.png');
 		game.load.spritesheet('dudesheet', '/client/image/dudesheet.png', 79, 66);
 		game.load.spritesheet(numToElement[0],'/client/image/water_image.png');
 		game.load.spritesheet(numToElement[1],'/client/image/fire_image.png');
@@ -73,7 +77,6 @@ gameState.prototype = {
 		var ground = mapWalls.create(0, 0, 'ground');
 		ground.scale.setTo(4000/736, 4000/736);
 		console.log("client started");
-
 		//ask for my player
 		socket.emit("my_player", {name: playerName});
 		// socket.on("connect", onsocketConnected);
@@ -142,6 +145,7 @@ gameState.prototype = {
 		if (!playerDude || !playerDude.alive) {
 			return;
 		}
+
 		if (gameProperties.in_game) {
 
 			//keyboardInput = game.input.keyboard.createCursorKeys();

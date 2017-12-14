@@ -157,6 +157,19 @@ class PlayerDude extends CdPlayer {
 		this.body.onBeginContact.add(player_coll);
 		this.body.onEndContact.add(player_leave);
 		cdplayerGame.camera.follow(this, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
+
+
+		this.skill1Show = game.add.image(1200, 600,'skill1');
+		this.skill2Show = game.add.image(1350, 600,'skill2');
+		this.skill3Show = game.add.image(1500, 600,'skill3');
+		this.skillbound = game.add.image(1224, 624,'skillbound');
+		this.skill1Show.fixedToCamera = true;
+		this.skill2Show.fixedToCamera = true;
+		this.skill3Show.fixedToCamera = true;
+		this.skillbound.fixedToCamera = true;
+		// skillbound.cameraOffset.setTo(1524, 624);
+		// skillbound.cameraOffset.setTo(1374, 624);
+		// skillbound.cameraOffset.setTo(1224, 624);
 	}
 
 	addSkill(type) {
@@ -236,6 +249,15 @@ class PlayerDude extends CdPlayer {
 			this.weapon = (this.weapon + this.skillList.length - 1) % this.skillList.length;
 		} else {
 			this.weapon = (this.weapon + 1) % this.skillList.length;
+		}
+		if(this.weapon == 0){
+			this.skillbound.cameraOffset.setTo(1224, 624);
+		}
+		else if(this.weapon == 1){
+			this.skillbound.cameraOffset.setTo(1374, 624);
+		}
+		else{
+			this.skillbound.cameraOffset.setTo(1524, 624);
 		}
 	}
 
