@@ -89,6 +89,7 @@ class Trap extends FlyingObject {
 
 var flyingInfo = [{
 	name: 'fireball',
+	image: 'skill0',
 	speed: 1200,
 	size: 10,
 	attack: 1,
@@ -97,6 +98,7 @@ var flyingInfo = [{
 	factory: Fireball,
 }, {
 	name: 'thunder',
+	image: 'skill1',
 	size: 30,
 	attack: 0.8,
 	affects: true,
@@ -105,6 +107,7 @@ var flyingInfo = [{
 	factory: Trap,
 }, {
 	name: 'tornado',
+	image: 'skill2',
 	speed: 500,
 	size: 30,
 	attack: 1.5,
@@ -113,6 +116,7 @@ var flyingInfo = [{
 	factory: Fireball,
 }, {
 	name: 'spring',
+	image: 'skill0',
 	size: 30,
 	attack: -1,
 	affects: false,
@@ -121,6 +125,7 @@ var flyingInfo = [{
 	factory: Trap,
 }, {
 	name: 'hide',
+	image: 'skill1',
 	cd: 10000,
 	lifespan: 2000,
 	factory: null,

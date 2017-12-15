@@ -8,7 +8,7 @@ var playerDude;
 //the enemy player list
 var enemies = [];
 
-// for the game cdplayer in
+// for the cdplayerGame cdplayer in
 var cdplayerGame = game;
 
 //show related area  (will be changed to Dictionary)*************
@@ -44,7 +44,7 @@ class CdPlayer extends Phaser.Sprite{
 	constructor(info) {
 		super(cdplayerGame, info.x, info.y);  // info.image || for default
 		
-		//add to game
+		//add to cdplayerGame
 		cdplayerGame.add.existing(this);
 		playerLayer.add(this);
 
@@ -137,7 +137,7 @@ class PlayerDude extends CdPlayer {
 	constructor(info) {
 		super(info);
 
-		//add to game
+		//add to cdplayerGame
 		cdplayerGame.add.existing(this);
 		playerLayer.add(this);
 
@@ -149,7 +149,10 @@ class PlayerDude extends CdPlayer {
 
 		//properties
 		this.skillList = [];
+		this.skillShow = [];
+		this.skillbound;
 		this.pickupList = [];
+		this.pickupShow = [];
 		this.body.collideWorldBounds = true;
 		this.fireTimeList = Array(flyingInfo.length).fill(0);
 		this.readyToPick = null;
@@ -157,19 +160,17 @@ class PlayerDude extends CdPlayer {
 		this.body.onBeginContact.add(player_coll);
 		this.body.onEndContact.add(player_leave);
 		cdplayerGame.camera.follow(this, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
-
-
-		this.skill1Show = game.add.image(1200, 600,'skill1');
-		this.skill2Show = game.add.image(1350, 600,'skill2');
-		this.skill3Show = game.add.image(1500, 600,'skill3');
-		this.skillbound = game.add.image(1224, 624,'skillbound');
-		this.skill1Show.fixedToCamera = true;
-		this.skill2Show.fixedToCamera = true;
-		this.skill3Show.fixedToCamera = true;
-		this.skillbound.fixedToCamera = true;
+		this.playerInfo = cdplayerGame.add.text(30, 900, this.getDisplayText());
+		this.playerInfo.fixedToCamera = true;
+		displayLayer.add(this.playerInfo);
+		
 		// skillbound.cameraOffset.setTo(1524, 624);
 		// skillbound.cameraOffset.setTo(1374, 624);
 		// skillbound.cameraOffset.setTo(1224, 624);
+	}
+
+	getDisplayText() {
+		return `attack: ${this.attack}  hp: ${this.health.toFixed()}\/${this.maxHealth.toFixed()}`;
 	}
 
 	addSkill(type) {
@@ -177,6 +178,16 @@ class PlayerDude extends CdPlayer {
 			return;
 		if (this.skillList.indexOf(type) === -1) {
 			this.skillList.push(type);
+			if (this.skillShow.length === 0) {
+				this.skillbound = cdplayerGame.add.image(26, 774, 'skillbound');
+				this.skillbound.fixedToCamera = true;
+				displayLayer.add(this.skillbound);
+			}
+			let skillImage = cdplayerGame.add.image(150 * this.skillShow.length, 750,
+				flyingInfo[type].image);
+			skillImage.fixedToCamera = true;
+			this.skillShow.push(skillImage);
+			displayLayer.add(skillImage);
 		}
 	}
 
@@ -225,7 +236,17 @@ class PlayerDude extends CdPlayer {
 	pickUp(pickup) {
 		this.pickupList.push(pickup);
 		if (this.pickupList.length == 3) {
+			this.pickupShow.forEach(function(element) {
+				element.destroy();
+			});
+			this.pickupShow = [];
 			this.upgrade();
+		} else {
+			let pickupImage = cdplayerGame.add.image(400 + 30 * this.pickupShow.length, 900,
+				numToElement[pickup.name]);
+			pickupImage.fixedToCamera = true;
+			this.pickupShow.push(pickupImage);
+			displayLayer.add(pickupImage);
 		}
 	}
 
@@ -245,20 +266,15 @@ class PlayerDude extends CdPlayer {
 	}
 
 	changeWeapon(op) {
+		if (this.skillList.length === 0) {
+			return;
+		}
 		if (op === 1) {
 			this.weapon = (this.weapon + this.skillList.length - 1) % this.skillList.length;
 		} else {
 			this.weapon = (this.weapon + 1) % this.skillList.length;
 		}
-		if(this.weapon == 0){
-			this.skillbound.cameraOffset.setTo(1224, 624);
-		}
-		else if(this.weapon == 1){
-			this.skillbound.cameraOffset.setTo(1374, 624);
-		}
-		else{
-			this.skillbound.cameraOffset.setTo(1524, 624);
-		}
+		this.skillbound.cameraOffset.setTo(150 * this.weapon + 26, 774);
 	}
 
 	speedBoost(p) {
@@ -293,7 +309,7 @@ function findplayerbyid (id) {
 //event related to Player
 
 // When the server notifies us of client disconnection, we find the disconnected
-// enemy and remove from our game
+// enemy and remove from our cdplayerGame
 function onRemovePlayer(data){
 	var removePlayer = findplayerbyid(data.id);
 	// Player not found
