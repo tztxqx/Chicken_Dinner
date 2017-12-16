@@ -23,16 +23,13 @@ var keyboardInput;
 // 	// send the server our initial position and tell it we are connected
 // 	socket.emit('new_player', {x: 32, y: 400});
 // }
+
 var gameState = function(game) {
-	this.keyW;
-	this.keyS;
-	this.keyA;
-	this.keyD;
-	this.keyF;
-	this.keyShift;
+	this.countFrame = {};
+	this.setFrame("input", 2);
+	this.setFrame("player", 1);
 };
 
-var countFrame = 0;
 var mapWalls;
 var pickupLayer;
 var flyingLayer;
@@ -40,16 +37,7 @@ var playerLayer;
 var displayLayer;
 
 gameState.prototype = {
-	preload: function() {
-		//console.log("preload");
-		game.stage.disableVisibilityChange = true;
-		game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
-		game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight);
-		game.physics.startSystem(Phaser.Physics.P2JS);
-		//game.physics.p2.setBoundsToWorld(true, true, true, true, true);
-		game.physics.p2.gravity.y = 0;
-		game.physics.p2.applyGravity = false;
-		//game.physics.p2.enableBody(game.physics.p2.walls);
+	loadImage: function() {
 		game.load.image('ground', '/client/image/map.jpg');
 		game.load.image(flyingInfo[0].image, '/client/image/skill0.png');
 		game.load.image(flyingInfo[1].image, '/client/image/skill1.png');
@@ -65,24 +53,40 @@ gameState.prototype = {
 		game.load.spritesheet(flyingInfo[1].name,'/client/image/thunder_image.png');
 		game.load.spritesheet(flyingInfo[2].name,'/client/image/wind_image.png');
 		game.load.spritesheet(flyingInfo[3].name,'/client/image/water_image.png');
+	},
+
+	preload: function() {
+		//console.log("preload");
+		game.stage.disableVisibilityChange = true;
+		game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+		game.world.setBounds(0, 0, gameProperties.gameWidth, gameProperties.gameHeight);
+		game.physics.startSystem(Phaser.Physics.P2JS);
+		//game.physics.p2.setBoundsToWorld(true, true, true, true, true);
+		game.physics.p2.gravity.y = 0;
+		game.physics.p2.applyGravity = false;
+		this.loadImage();
+		//game.physics.p2.enableBody(game.physics.p2.walls);
     },
 
-	create: function () {
-		game.stage.backgroundColor = 0xE1A193;
-		mapWalls = game.add.group();
-		flyingLayer = game.add.group();
-		pickupLayer = game.add.group();
-		playerLayer = game.add.group();
-		displayLayer = game.add.group();
+    boundKey: function() {
+    	this.keyQ = game.input.keyboard.addKey(Phaser.Keyboard.Q);
+		this.keyQ.onDown.add(function(){
+			if (playerDude) {
+				playerDude.changeWeapon();
+			}
+		}, this);
+		game.input.keyboard.removeKeyCapture(Phaser.Keyboard.Q);
+		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
+		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
+		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
+		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
+		this.keyF = game.input.keyboard.addKey(Phaser.Keyboard.F);
+		this.keyShift = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
+		this.mouseL = game.input.activePointer.leftButton;
+    },
 
-		mapWalls.enableBody = true;
-		var ground = mapWalls.create(0, 0, 'ground');
-		ground.scale.setTo(4000/736, 4000/736);
-		console.log("client started");
-		//ask for my player
-		socket.emit("my_player", {name: playerName});
-		// socket.on("connect", onsocketConnected);
-		socket.on("create_player", createMyPlayer);
+    listenSocket: function() {
+    	socket.on("create_player", createMyPlayer);
 		//socket.on("connect", onsocketConnected);
 		//listen to new enemy connections
 		socket.on("new_enemy", onNewPlayer);
@@ -99,20 +103,25 @@ gameState.prototype = {
 		socket.on("new_pickup", onItemUpdate);
 		socket.on("new_flying", onNewFlying);
 		socket.on("player_use_skill", onUsingSkill);
-		this.keyQ = game.input.keyboard.addKey(Phaser.Keyboard.Q);
-		this.keyQ.onDown.add(function(){
-			if (playerDude) {
-				playerDude.changeWeapon();
-			}
-		}, this);
-		game.input.keyboard.removeKeyCapture(Phaser.Keyboard.Q);
-		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
-		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
-		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
-		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
-		this.keyF = game.input.keyboard.addKey(Phaser.Keyboard.F);
-		this.keyShift = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
-		this.mouseL = game.input.activePointer.leftButton;
+    },
+
+	create: function () {
+		game.stage.backgroundColor = 0xE1A193;
+		mapWalls = game.add.group();
+		flyingLayer = game.add.group();
+		pickupLayer = game.add.group();
+		playerLayer = game.add.group();
+		displayLayer = game.add.group();
+
+		mapWalls.enableBody = true;
+		var ground = mapWalls.create(0, 0, 'ground');
+		ground.scale.setTo(4000/736, 4000/736);
+		console.log("client started");
+		//ask for my player
+		this.listenSocket();
+		socket.emit("my_player", {name: playerName});
+		// socket.on("connect", onsocketConnected);
+		this.boundKey();
 	},
 
 	processKey: function() {
@@ -139,15 +148,24 @@ gameState.prototype = {
 		return key;
 	},
 
-	update: function () {
-		countFrame ++;
-		if (countFrame % 2 != 0) {
-			return;
-		}
-		if (!playerDude || !playerDude.alive) {
-			return;
-		}
+	setFrame: function(key, y) {
+		this.countFrame[key] = {
+			x: 0,
+			y: y
+		};
+	},
 
+	updateFrame: function(key) {
+		this.countFrame[key].x ++;
+		if (this.countFrame[key].x % this.countFrame[key].y != 0) {
+			return false;
+		}
+		return true;
+	},
+
+	sendInput: function() {
+		if (!this.updateFrame("input"))
+			return;
 		if (gameProperties.in_game) {
 
 			//keyboardInput = game.input.keyboard.createCursorKeys();
@@ -201,8 +219,19 @@ gameState.prototype = {
 			// Change life value can change the value in the health bar
 			//playerDude.health_bar.setPercent(playerDude.health / playerDude.maxHealth * 100);
 		}
+	},
 
+	playerUpdate: function() {
+		if (!this.updateFrame("player"))
+			return;
+		playerDude.update();
+	},
+
+	update: function () {
+		if (!playerDude || !playerDude.alive) {
+			return;
+		}
+		this.sendInput();
+		this.playerUpdate();
 	}
 }
-
-

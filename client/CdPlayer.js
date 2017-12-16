@@ -28,6 +28,8 @@ var speed_two_direction = 0.8;
 
 var playerAttack = 10;
 var maxHealth = 100;
+var maxVitality = 100;
+var vitalityRecover = 0.05;
 var maxSkills = 3;
 
 var waterRecover = 30;
@@ -100,7 +102,7 @@ class CdPlayer extends Phaser.Sprite{
 
 	hpStatusChange(delta, deltaMax) {
 		if (deltaMax != undefined)
-			maxHealth += deltaMax;
+			this.maxHealth += deltaMax;
 		this.health += delta;
 		if (this.health > this.maxHealth) {
 			this.health = this.maxHealth;
@@ -143,6 +145,8 @@ class PlayerDude extends CdPlayer {
 
 		// socket id
 		this.attack = playerAttack;
+		this.vitality = maxVitality;
+		this.maxVitality = maxVitality;
 		this.alive = true;
 		this.weapon = 0;
 		this.boost = 1.0;
@@ -160,7 +164,8 @@ class PlayerDude extends CdPlayer {
 		this.body.onBeginContact.add(player_coll);
 		this.body.onEndContact.add(player_leave);
 		cdplayerGame.camera.follow(this, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
-		this.playerInfo = cdplayerGame.add.text(30, 900, this.getDisplayText());
+		this.playerInfo = cdplayerGame.add.text(30, 900, "", {font: "15px Arial"});
+		this.setDisplayText();
 		this.playerInfo.fixedToCamera = true;
 		displayLayer.add(this.playerInfo);
 		
@@ -169,8 +174,17 @@ class PlayerDude extends CdPlayer {
 		// skillbound.cameraOffset.setTo(1224, 624);
 	}
 
-	getDisplayText() {
-		return `attack: ${this.attack}  hp: ${this.health.toFixed()}\/${this.maxHealth.toFixed()}`;
+	setDisplayText() {
+		this.playerInfo.setText(
+			`attack: ${this.attack}  ` +
+			`hp: ${this.health.toFixed()}\/${this.maxHealth.toFixed()}  ` +
+			`mp: ${this.vitality.toFixed()}\/${this.maxVitality.toFixed()}`
+		);
+	}
+
+	setHealthBar() {
+		super.setHealthBar();
+		this.setDisplayText();
 	}
 
 	addSkill(type) {
@@ -218,9 +232,9 @@ class PlayerDude extends CdPlayer {
 			}
 		} else
 		if (result[0] === result[1] || result[1] === result[2]) {
-			if (result[1] === 0)
+			if (result[1] === 0) {
 				socket.emit("hp_get", {delta: waterRecover, deltaMax: 0});
-			else if (result[1] === 1) {
+			} else if (result[1] === 1) {
 			} else if (result[1] === 2) {
 				this.attack += thunderUp;
 			} else if (result[1] === 3) {
@@ -242,7 +256,7 @@ class PlayerDude extends CdPlayer {
 			this.pickupShow = [];
 			this.upgrade();
 		} else {
-			let pickupImage = cdplayerGame.add.image(400 + 30 * this.pickupShow.length, 900,
+			let pickupImage = cdplayerGame.add.image(300 + 30 * this.pickupShow.length, 890,
 				numToElement[pickup.name]);
 			pickupImage.fixedToCamera = true;
 			this.pickupShow.push(pickupImage);
@@ -252,7 +266,9 @@ class PlayerDude extends CdPlayer {
 
 	fire() {
 		var type = this.skillList[this.weapon];
-		if (cdplayerGame.time.now > this.fireTimeList[type]) {
+		if (cdplayerGame.time.now > this.fireTimeList[type] &&
+			this.vitality >= flyingInfo[type].vitality) {
+			this.mpStatusChange(-flyingInfo[type].vitality);
 			this.fireTimeList[type] = cdplayerGame.time.now + flyingInfo[type].cd;
 			return type;
 		} else return -1;
@@ -287,6 +303,23 @@ class PlayerDude extends CdPlayer {
 			x: p.x * bst,
 			y: p.y * bst,
 		}
+	}
+
+	mpStatusChange(delta, deltaMax) {
+		if (deltaMax != undefined)
+			this.maxVitality += deltaMax;
+		this.vitality += delta;
+		if (this.vitality > this.maxVitality) {
+			this.vitality = this.maxVitality;
+		}
+		if (this.vitality < 0) {
+			this.vitality = 0;
+		}
+		this.setDisplayText();
+	}
+
+	update() {
+		this.mpStatusChange(vitalityRecover);
 	}
 
 	destroy() {

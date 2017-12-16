@@ -94,6 +94,7 @@ var flyingInfo = [{
 	size: 10,
 	attack: 1,
 	cd: 500,
+	vitality: 10,
 	lifespan: 1000,
 	factory: Fireball,
 }, {
@@ -103,6 +104,7 @@ var flyingInfo = [{
 	attack: 0.8,
 	affects: true,
 	cd: 2000,
+	vitality: 20,
 	lifespan: 200,
 	factory: Trap,
 }, {
@@ -112,6 +114,7 @@ var flyingInfo = [{
 	size: 30,
 	attack: 1.5,
 	cd: 1000,
+	vitality: 20,
 	lifespan: 2000,
 	factory: Fireball,
 }, {
@@ -121,12 +124,14 @@ var flyingInfo = [{
 	attack: -1,
 	affects: false,
 	cd: 5000,
+	vitality: 30,
 	lifespan: 200,
 	factory: Trap,
 }, {
 	name: 'hide',
 	image: 'skill1',
 	cd: 10000,
+	vitality: 20,
 	lifespan: 2000,
 	factory: null,
 }];
