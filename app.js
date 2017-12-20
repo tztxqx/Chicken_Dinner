@@ -174,18 +174,20 @@ function onNewplayer (data) {
 
 	//send to the new player about everyone who is already connected.
 	var that = this;
+	that.emit("create_player", newPlayer.Info());
 	playerList.forEach(function(player) {
 		that.emit("new_enemy", player.Info());
 	});
 	pickupList.forEach(function(pickup) {
 		that.emit("new_pickup", pickup.Info());
 	});
+	if (gameState === 2) {
+		that.emit("new_game", {countDown: 0});
+	}
 	//send message to every connected client except the sender
 	this.broadcast.emit('new_enemy', newPlayer.Info());
-
 	playerList.push(newPlayer);
 	//console.log(playerList.length);
-	this.emit("create_player", newPlayer.Info());
 }
 
 function removePlayer() {
