@@ -44,15 +44,16 @@ gameState.prototype = {
 		game.load.image(flyingInfo[2].image, '/client/image/skill2.png');
 		game.load.image('skillbound', '/client/image/skillbound.png');
 		game.load.spritesheet('dudesheet', '/client/image/dudesheet.png', 79, 66);
-		game.load.spritesheet(numToElement[0],'/client/image/water_image.png');
-		game.load.spritesheet(numToElement[1],'/client/image/fire_image.png');
-		game.load.spritesheet(numToElement[2],'/client/image/thunder_image.png');
-		game.load.spritesheet(numToElement[3],'/client/image/wind_image.png');
-		game.load.spritesheet(numToElement[4],'/client/image/earth_image.png');
-		game.load.spritesheet(flyingInfo[0].name,'/client/image/fire_image.png');
-		game.load.spritesheet(flyingInfo[1].name,'/client/image/thunder_range.png');
-		game.load.spritesheet(flyingInfo[2].name,'/client/image/wind_image.png');
-		game.load.spritesheet(flyingInfo[3].name,'/client/image/water_image.png');
+		game.load.image(numToElement[0],'/client/image/water_image.png');
+		game.load.image(numToElement[1],'/client/image/fire_image.png');
+		game.load.image(numToElement[2],'/client/image/thunder_image.png');
+		game.load.image(numToElement[3],'/client/image/wind_image.png');
+		game.load.image(numToElement[4],'/client/image/earth_image.png');
+		game.load.image(flyingInfo[0].name,'/client/image/fire_image.png');
+		game.load.image(flyingInfo[1].name,'/client/image/thunder_range.png');
+		game.load.image(flyingInfo[2].name,'/client/image/wind_image.png');
+		game.load.image(flyingInfo[3].name,'/client/image/water_image.png');
+		game.load.image(flyingInfo[5].name,'/client/image/wind_image.png');
 	},
 
 	preload: function() {
@@ -219,11 +220,11 @@ gameState.prototype = {
 					inputSet.fire = 1;
 					inputSet.fireName = key.fire;
 					inputSet.attack = playerDude.attack;
-					if (key.fire === 1) {
+					if (flyingInfo[key.fire].attackMode === "mouse") {
 						inputSet.worldX = pointer.worldX;
 						inputSet.worldY = pointer.worldY;
 					}
-					if (key.fire === 3) {
+					if (flyingInfo[key.fire].attackMode === "player") {
 						inputSet.worldX = inputSet.x;
 						inputSet.worldY = inputSet.y;
 					}

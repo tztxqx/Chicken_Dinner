@@ -102,6 +102,7 @@ var flyingInfo = [{
 	image: 'skill1',
 	size: 30,
 	attack: 0.8,
+	attackMode: "mouse",
 	affects: true,
 	cd: 2000,
 	vitality: 20,
@@ -122,6 +123,7 @@ var flyingInfo = [{
 	image: 'skill0',
 	size: 30,
 	attack: -1,
+	attackMode: "player",
 	affects: false,
 	cd: 5000,
 	vitality: 30,
@@ -134,6 +136,16 @@ var flyingInfo = [{
 	vitality: 20,
 	lifespan: 2000,
 	factory: null,
+}, {
+	name: 'flow',
+	image: 'skill2',
+	speed: 1800,
+	size: 5,
+	attack: 0.5,
+	cd: 100,
+	vitality: 5,
+	lifespan: 500,
+	factory: Fireball,
 }];
 
 // search through food list to find the food object
@@ -146,6 +158,7 @@ function findflyingbyid(id) {
 
 // function called when new food is added in the server.
 function onNewFlying (data) {
+	//console.log(data);
 	var factory = flyingInfo[data.name].factory;
 	if (factory === null)
 		return;

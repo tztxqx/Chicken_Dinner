@@ -24,7 +24,7 @@ var gameSettings = {
 	itemNum: 100,
 };
 
-const beginCountDown = 10;
+const beginCountDown = 2;
 var gameState = 0;
 
 // all lists
@@ -102,7 +102,7 @@ class Flying extends GameObject {
 		super(info.x, info.y, info.id, info.name);
 		this.owner = info.owner;
 		this.attack = info.attack;
-		if (inList(this.name, [0, 2])) {
+		if (flyingInfo[this.name].factory === "Fireball") {
 			this.rotation = info.rotation;
 		}
 	}
@@ -116,7 +116,7 @@ class Flying extends GameObject {
 			owner: this.owner,
 			attack: this.attack,
 		};
-		if (inList(this.name, [0, 2])) {
+		if (flyingInfo[this.name].factory === "Fireball") {
 			info.rotation = this.rotation;
 		}
 		return info;
@@ -240,7 +240,7 @@ function pickUp(playerId, pickupId) {
 
 function newFire(playerId, data) {
 	var uniqueId = unique.v4();
-	if (inList(data.fireName, [0, 2])) {
+	if (flyingInfo[data.fireName].factory === "Fireball") {
 		var flying = new Flying({
 			x: data.x,
 			y: data.y,
@@ -316,11 +316,13 @@ function onPlayerStateChanged(data){
 		pickUp(this.id, data.pickId);
 	}
 	if (data.fire) {
-		//console.log(data.fireName);
-		if (inList(data.fireName, [0, 1, 2, 3])) {
-			newFire(this.id, data);
+		if (Number(data.fireName) > flyingInfo.length){
 		} else {
-			useSkill(this, data);
+			if (flyingInfo[data.fireName].factory != "null") {
+				newFire(this.id, data);
+			} else {
+				useSkill(this, data);
+			}
 		}
 		//console.log(data);
 	}
@@ -342,3 +344,23 @@ io.sockets.on('connection', function(socket){
 	socket.on("hp_get", onHpGet);
 	socket.on("new_game", changeGameState);
 });
+
+var flyingInfo = [{
+	name: 'fireball',
+	factory: "Fireball",
+}, {
+	name: 'skyThunder',
+	factory: "Trap",
+}, {
+	name: 'tornado',
+	factory: "Fireball",
+}, {
+	name: 'spring',
+	factory: "Trap",
+}, {
+	name: 'hide',
+	factory: "null",
+}, {
+	name: 'flow',
+	factory: "Fireball",
+}];

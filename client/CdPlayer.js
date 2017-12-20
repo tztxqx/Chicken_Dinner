@@ -246,6 +246,10 @@ class PlayerDude extends CdPlayer {
 			} else if (result[1] === 4) {
 				socket.emit("hp_get", {delta: earthImprove, deltaMax: earthImprove});
 			}
+		} else {
+			if (result[0] === 1 && result[1] === 2 && result[2] === 3) {
+				this.addSkill(5);
+			}
 		}
 		this.setHealthBar();
 		this.pickupList = [];
