@@ -9,8 +9,6 @@ var gameProperties = {
 	in_game: false,
 };
 
-
-
 //variables
 var keyboardInput;
 
@@ -28,6 +26,7 @@ var gameState = function(game) {
 	this.countFrame = {};
 	this.setFrame("input", 2);
 	this.setFrame("player", 1);
+	this.setFrame("circle", 10);
 };
 
 var mapWalls;
@@ -35,6 +34,7 @@ var pickupLayer;
 var flyingLayer;
 var playerLayer;
 var displayLayer;
+var playerGameState = 0;
 
 gameState.prototype = {
 	loadImage: function() {
@@ -50,7 +50,7 @@ gameState.prototype = {
 		game.load.spritesheet(numToElement[3],'/client/image/wind_image.png');
 		game.load.spritesheet(numToElement[4],'/client/image/earth_image.png');
 		game.load.spritesheet(flyingInfo[0].name,'/client/image/fire_image.png');
-		game.load.spritesheet(flyingInfo[1].name,'/client/image/thunder_image.png');
+		game.load.spritesheet(flyingInfo[1].name,'/client/image/thunder_range.png');
 		game.load.spritesheet(flyingInfo[2].name,'/client/image/wind_image.png');
 		game.load.spritesheet(flyingInfo[3].name,'/client/image/water_image.png');
 	},
@@ -68,20 +68,34 @@ gameState.prototype = {
 		//game.physics.p2.enableBody(game.physics.p2.walls);
     },
 
-    boundKey: function() {
+    bindKeys: function() {
     	this.keyQ = game.input.keyboard.addKey(Phaser.Keyboard.Q);
 		this.keyQ.onDown.add(function(){
-			if (playerDude) {
-				playerDude.changeWeapon();
+			if (gameProperties.in_game) {
+				playerDude.changeWeapon(1);
 			}
 		}, this);
 		game.input.keyboard.removeKeyCapture(Phaser.Keyboard.Q);
+		this.keyE = game.input.keyboard.addKey(Phaser.Keyboard.E);
+		this.keyE.onDown.add(function(){
+			if (gameProperties.in_game) {
+				playerDude.changeWeapon();
+			}
+		}, this);
+		game.input.keyboard.removeKeyCapture(Phaser.Keyboard.E);
 		this.keyW = game.input.keyboard.addKey(Phaser.Keyboard.W);
 		this.keyA = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.keyS = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.keyD = game.input.keyboard.addKey(Phaser.Keyboard.D);
 		this.keyF = game.input.keyboard.addKey(Phaser.Keyboard.F);
 		this.keyShift = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
+		this.keyEnter = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+		this.keyEnter.onDown.add(function(){
+			if (gameProperties.in_game) {
+				socket.emit("new_game", 1);
+			}
+		}, this);
+		game.input.keyboard.removeKeyCapture(Phaser.Keyboard.ENTER);
 		this.mouseL = game.input.activePointer.leftButton;
     },
 
@@ -103,6 +117,7 @@ gameState.prototype = {
 		socket.on("new_pickup", onItemUpdate);
 		socket.on("new_flying", onNewFlying);
 		socket.on("player_use_skill", onUsingSkill);
+		socket.on("new_game", onNewGame);
     },
 
 	create: function () {
@@ -121,11 +136,11 @@ gameState.prototype = {
 		this.listenSocket();
 		socket.emit("my_player", {name: playerName});
 		// socket.on("connect", onsocketConnected);
-		this.boundKey();
+		this.bindKeys();
 	},
 
 	processKey: function() {
-		var key = {x: 0, y: 0, f: 0, shift: 0, fire: -1};
+		var key = {x: 0, y: 0, f: 0, shift: 0, fire: -1, start: 0};
 		if (this.keyW.isDown) {
 			key.y = -1;
 		} else if (this.keyS.isDown) {
@@ -144,6 +159,9 @@ gameState.prototype = {
 		}
 		if (this.mouseL.isDown) {
 			key.fire = playerDude.fire();
+		}
+		if (this.keyEnter.isDown) {
+			key.start = 1;
 		}
 		return key;
 	},
@@ -192,20 +210,23 @@ gameState.prototype = {
 				y: playerDude.body.y,
 				rotation : playerDude.bodyRotation,
 			};
-			if (key.f && playerDude.readyToPick) {
-				inputSet.pickId = playerDude.readyToPick.id;
-			}
-			if (key.fire != -1) {
-				inputSet.fire = 1;
-				inputSet.fireName = key.fire;
-				inputSet.attack = playerDude.attack;
-				if (key.fire === 1) {
-					inputSet.worldX = pointer.worldX;
-					inputSet.worldY = pointer.worldY;
+
+			if (playerGameState === 2) {
+				if (key.f && playerDude.readyToPick) {
+					inputSet.pickId = playerDude.readyToPick.id;
 				}
-				if (key.fire === 3) {
-					inputSet.worldX = inputSet.x;
-					inputSet.worldY = inputSet.y;
+				if (key.fire != -1) {
+					inputSet.fire = 1;
+					inputSet.fireName = key.fire;
+					inputSet.attack = playerDude.attack;
+					if (key.fire === 1) {
+						inputSet.worldX = pointer.worldX;
+						inputSet.worldY = pointer.worldY;
+					}
+					if (key.fire === 3) {
+						inputSet.worldX = inputSet.x;
+						inputSet.worldY = inputSet.y;
+					}
 				}
 			}
 
@@ -228,10 +249,23 @@ gameState.prototype = {
 	},
 
 	update: function () {
-		if (!playerDude || !playerDude.alive) {
+		if (!gameProperties.in_game) {
 			return;
 		}
 		this.sendInput();
 		this.playerUpdate();
+	}
+}
+
+function onNewGame(data) {
+	if (!gameProperties.in_game) {
+		return;
+	}
+	if (data.countDown === 0) {
+		playerGameState = 2;
+		playerDude.gameInfo.setText("Begin!");
+	} else {
+		playerGameState = 1;
+		playerDude.gameInfo.setText("Counting: " + String(data.countDown));
 	}
 }

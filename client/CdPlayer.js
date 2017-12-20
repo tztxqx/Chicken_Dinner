@@ -147,7 +147,6 @@ class PlayerDude extends CdPlayer {
 		this.attack = playerAttack;
 		this.vitality = maxVitality;
 		this.maxVitality = maxVitality;
-		this.alive = true;
 		this.weapon = 0;
 		this.boost = 1.0;
 
@@ -164,6 +163,10 @@ class PlayerDude extends CdPlayer {
 		this.body.onBeginContact.add(player_coll);
 		this.body.onEndContact.add(player_leave);
 		cdplayerGame.camera.follow(this, Phaser.Camera.FOLLOW_LOCKON, 0.5, 0.5);
+
+		this.gameInfo = cdplayerGame.add.text(30, 30, "waiting", {font: "15px Arial"});
+		this.gameInfo.fixedToCamera = true;
+		displayLayer.add(this.gameInfo);
 		this.playerInfo = cdplayerGame.add.text(30, 900, "", {font: "15px Arial"});
 		this.setDisplayText();
 		this.playerInfo.fixedToCamera = true;
@@ -235,6 +238,7 @@ class PlayerDude extends CdPlayer {
 			if (result[1] === 0) {
 				socket.emit("hp_get", {delta: waterRecover, deltaMax: 0});
 			} else if (result[1] === 1) {
+				this.mpStatusChange(50);
 			} else if (result[1] === 2) {
 				this.attack += thunderUp;
 			} else if (result[1] === 3) {
@@ -324,7 +328,6 @@ class PlayerDude extends CdPlayer {
 
 	destroy() {
 		super.destroy();
-		this.alive = false;
 	}
 }
 

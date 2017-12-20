@@ -98,7 +98,7 @@ var flyingInfo = [{
 	lifespan: 1000,
 	factory: Fireball,
 }, {
-	name: 'thunder',
+	name: 'skyThunder',
 	image: 'skill1',
 	size: 30,
 	attack: 0.8,

@@ -1,5 +1,5 @@
 function player_coll (body, shapeA, shapeB, equation) {
-	if (!body)
+	if (!body || !gameProperties.in_game)
 		return;
 	var gameObject = body.controller;
 	var bodyId = gameObject.id;
@@ -21,7 +21,7 @@ function player_coll (body, shapeA, shapeB, equation) {
 
 function player_leave (body, shapeA, shapeB, equation) {
 	// console.log("leave", body);
-	if (!body)
+	if (!body || !gameProperties.in_game)
 		return;
 	var gameObject = body.controller;
 	var bodyId = gameObject.id;

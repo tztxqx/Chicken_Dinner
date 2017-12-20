@@ -24,6 +24,9 @@ var gameSettings = {
 	itemNum: 100,
 };
 
+const beginCountDown = 10;
+var gameState = 0;
+
 // all lists
 var playerList = [];
 var pickupList = [];
@@ -191,6 +194,9 @@ function removePlayer() {
 	if (currentPlayer) {
 		playerList.splice(playerList.indexOf(currentPlayer), 1);
 	}
+	if (playerList.length === 0) {
+		gameState = 0;
+	}
 	console.log("removing player " + this.id);
 	//send message to every connected client except the sender
 	io.emit('remove_player', {id: this.id});
@@ -265,6 +271,29 @@ function useSkill(socket, data) {
 	socket.emit("player_use_skill", {skillId: data.fireName});
 }
 
+function countDown(time) {
+	setTimeout(function() {
+		time -= 1;
+		if (time >= 0) {
+			io.emit("new_game", {countDown: time});
+			if (time === 0) {
+				gameState = 2;
+			} else {
+				countDown(time);
+			}
+		}
+	}, 1000);
+}
+
+function changeGameState(state) {
+	if (state === 1) {
+		if (gameState === 0) {
+			gameState = 1;
+			countDown(beginCountDown);
+		}
+	}
+}
+
 function onPlayerStateChanged(data){
 	var movePlayer = findPlayerId(this.id);
 	if(!movePlayer){
@@ -280,6 +309,9 @@ function onPlayerStateChanged(data){
 	//console.log(data.rotation);
 	//console.log("where is enemy", currentData);
 	this.broadcast.emit('enemy_state_change', currentData);
+	if (data.start) {
+		changeGameState(data.start);
+	}
 	if (data.pickId) {
 		pickUp(this.id, data.pickId);
 	}
@@ -308,4 +340,5 @@ io.sockets.on('connection', function(socket){
 	socket.on("player_buff", onPlayerBuff);
 	socket.on("player_hit", onHit);
 	socket.on("hp_get", onHpGet);
+	socket.on("new_game", changeGameState);
 });
