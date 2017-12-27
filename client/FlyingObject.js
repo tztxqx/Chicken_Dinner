@@ -4,6 +4,8 @@ var flyingObjectGame = game;
 //the flying list
 var flyingObjectList = [];
 var spriteSize = 10;
+var circleSize = 5000;
+var globalCircle = null;
 
 //for flying info will be {x,y,id,name,owner,attack}
 class FlyingObject extends Phaser.Sprite{
@@ -84,6 +86,46 @@ class Trap extends FlyingObject {
 	hitPlayer(player) {
 		player.hpStatusChange(-this.attack);
 		return false;
+	}
+}
+
+class Circle extends Phaser.Sprite{
+	constructor(info){
+		super(flyingObjectGame, info.x, info.y,
+			info.image);
+		
+		//add to game
+		flyingObjectGame.add.existing(this);
+		flyingLayer.add(this);
+
+		this.type = "circle";
+		this.name = "circle";
+		this.alpha = 0.3;
+		
+		//physics enable
+		flyingObjectGame.physics.p2.enableBody(this);
+		this.variableSize = circleSize;
+		this.scale.set(this.variableSize / spriteSize);
+		this.body.controller = this;
+		this.body.setCircle(1);
+		this.body.data.shapes[0].sensor = true;
+	}
+
+	update() {
+		if (this.variableSize > 10) {
+			this.variableSize -= 2;
+			this.scale.set(this.variableSize / spriteSize);
+		}
+	}
+
+	inCircle(player) {
+		let dx = player.body.x - this.x;
+		let dy = player.body.y - this.y;
+		if (Math.sqrt(dx * dx + dy * dy) <= this.variableSize) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
 
@@ -176,4 +218,12 @@ function onPlayerHit (data) {
 	if (flying.hitPlayer(player)) {
 		flying.kill();
 	}
+}
+
+function newCircle () {
+	globalCircle = new Circle({
+		x: gameProperties.gameWidth/2,
+		y: gameProperties.gameHeight/2,
+		image: "circle",
+	});
 }

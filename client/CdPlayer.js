@@ -34,9 +34,12 @@ var maxSkills = 3;
 
 var waterRecover = 30;
 var fireAttack = 1;
-var thunderUp = 20;
+var thunderUp = 5;
 var windBoost = 0.3;
 var earthImprove = 10;
+
+var circleCountMax = 1000;
+var circleDamage = 30;
 
 // **************
 
@@ -156,9 +159,10 @@ class PlayerDude extends CdPlayer {
 		this.skillbound;
 		this.pickupList = [];
 		this.pickupShow = [];
+		this.circleCount = 0;
 		this.body.collideWorldBounds = true;
 		this.fireTimeList = Array(flyingInfo.length).fill(0);
-		this.readyToPick = null;
+		this.readyToPick = [];
 
 		this.body.onBeginContact.add(player_coll);
 		this.body.onEndContact.add(player_leave);
@@ -255,9 +259,22 @@ class PlayerDude extends CdPlayer {
 		this.pickupList = [];
 	}
 
+	addPickup(gameObject) {
+		this.readyToPick.push(gameObject);
+		gameObject.hintText.visible = true;
+	}
+
+	removePickup(gameObject) {
+		let pickup = this.readyToPick.indexOf(gameObject);
+		if (pickup != -1)
+			this.readyToPick.splice(pickup, 1); 
+		if (this.readyToPick.length === 0)
+			gameObject.hintText.visible = false;
+	}
+
 	pickUp(pickup) {
 		this.pickupList.push(pickup);
-		if (this.pickupList.length == 3) {
+		if (this.pickupList.length === 3) {
 			this.pickupShow.forEach(function(element) {
 				element.destroy();
 			});
@@ -326,8 +343,23 @@ class PlayerDude extends CdPlayer {
 		this.setDisplayText();
 	}
 
+	circleCountDown() {
+		if (--this.circleCount <= 0) {
+			this.circleCount = circleCountMax;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	update() {
 		this.mpStatusChange(vitalityRecover);
+		if (globalCircle && !globalCircle.inCircle(this)) {
+			if (this.circleCountDown()) {
+				socket.emit("hp_get", {delta: -circleDamage, deltaMax: 0});
+				console.log("wtf");
+			}
+		}
 	}
 
 	destroy() {

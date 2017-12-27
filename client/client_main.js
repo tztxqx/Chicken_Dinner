@@ -54,6 +54,7 @@ gameState.prototype = {
 		game.load.image(flyingInfo[2].name,'/client/image/wind_image.png');
 		game.load.image(flyingInfo[3].name,'/client/image/water_image.png');
 		game.load.image(flyingInfo[5].name,'/client/image/wind_image.png');
+		game.load.image("circle",'/client/image/water_image.png');
 	},
 
 	preload: function() {
@@ -213,8 +214,8 @@ gameState.prototype = {
 			};
 
 			if (playerGameState === 2) {
-				if (key.f && playerDude.readyToPick) {
-					inputSet.pickId = playerDude.readyToPick.id;
+				if (key.f && playerDude.readyToPick.length > 0) {
+					inputSet.pickId = playerDude.readyToPick[0].id;
 				}
 				if (key.fire != -1) {
 					inputSet.fire = 1;
@@ -244,9 +245,14 @@ gameState.prototype = {
 	},
 
 	playerUpdate: function() {
-		if (!this.updateFrame("player"))
-			return;
-		playerDude.update();
+		if (this.updateFrame("player")) {
+			playerDude.update();
+		}
+		if (this.updateFrame("circle")) {
+			if (globalCircle) {
+				globalCircle.update();
+			}
+		}
 	},
 
 	update: function () {
@@ -264,6 +270,7 @@ function onNewGame(data) {
 	}
 	if (data.countDown === 0) {
 		playerGameState = 2;
+		newCircle();
 		playerDude.gameInfo.setText("Begin!");
 	} else {
 		playerGameState = 1;
